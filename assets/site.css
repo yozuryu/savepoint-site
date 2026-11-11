@@ -29,7 +29,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: calc(76px + env(safe-area-inset-top, 0px)); background: var(--bg); }
-body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body { margin: 0; background: transparent;   /* html paints the page colour, so the fixed .sky layer (z-index -1) shows through */ color: var(--text); font: 400 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: clip; }
 img { max-width: 100%; height: auto; display: block; }
 a { color: var(--blue); text-decoration: none; }
 a:hover { color: var(--white); }
@@ -42,10 +42,14 @@ code, kbd, pre { font-family: var(--mono); }
 /* ── Background: grid fading out from the top, slow drifting glows ── */
 .sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .sky::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(102, 192, 244, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(102, 192, 244, .045) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%); }
-.glow { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .55; animation: drift 22s ease-in-out infinite alternate; }
+/* The library mosaic, tilted and faint like the posters, drifting slowly */
+.sky::after { content: ""; position: absolute; inset: -50%; background: url(art-fallback.webp) 0 0 / 640px auto; transform: rotate(-12deg); opacity: .06; mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 85%); animation: mosaic 120s linear infinite; }
+@keyframes mosaic { to { background-position: 640px 470px; } }
+.glow { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .7; animation: drift 22s ease-in-out infinite alternate; }
 .glow.a { width: 620px; height: 460px; left: -120px; top: -160px; background: rgba(102, 192, 244, .45); }
 .glow.b { width: 520px; height: 420px; right: -140px; top: 120px; background: rgba(229, 177, 67, .28); animation-delay: -8s; }
-.glow.c { width: 520px; height: 380px; left: 30%; top: 70vh; background: rgba(82, 176, 67, .18); animation-delay: -14s; }
+.glow.c { width: 520px; height: 380px; left: 30%; top: 70vh; background: rgba(82, 176, 67, .2); animation-delay: -14s; }
+.glow.d { width: 460px; height: 360px; right: 10%; bottom: -120px; background: rgba(229, 177, 67, .16); animation-delay: -4s; }
 @keyframes drift { to { transform: translate(60px, 40px) scale(1.12); } }
 
 /* ── Nav ── */
