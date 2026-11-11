@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Savepoint</title>
+    <meta name="description" content="A self-hosted gaming hub for RetroAchievements, Steam and Xbox. Your achievements, playtime and completions on one site you own, updated every hour, free to host on GitHub.">
+    <meta name="theme-color" content="#0b0f15">
+    <meta property="og:title" content="Savepoint">
+    <meta property="og:description" content="Your RetroAchievements, Steam and Xbox progress on one site you own. Free, self-hosted on GitHub.">
+    <meta property="og:image" content="https://yozuryu.github.io/savepoint-site/assets/og.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="assets/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>document.documentElement.classList.add('js')</script>
+    <style>
+        /* ── Hero ── */
+        .hero { padding-block: clamp(48px, 8vw, 96px) clamp(64px, 9vw, 120px); }
+        .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 40px; align-items: center; }
+        .hero-copy { display: flex; flex-direction: column; gap: 26px; align-items: flex-start; }
+        .hero h1 { font-size: clamp(40px, 4.6vw, 64px); line-height: .95; font-weight: 800; }
+        .hero .lede { font-size: clamp(18px, 1.8vw, 21px); }
+        .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+        .stage { position: relative; aspect-ratio: 1.12; }
+        .stage .browser { position: absolute; left: 14%; top: 6%; width: 86%; animation: bob 9s ease-in-out infinite; }
+        .stage .browser img { aspect-ratio: 1440 / 880; object-fit: cover; object-position: top; }
+        .stage .phone { position: absolute; left: 0; top: 30%; width: 30%; animation: bob 9s ease-in-out -4.5s infinite; z-index: 2; }
+        .stage .halo { position: absolute; inset: 10% 0 0 20%; border-radius: 50%; background: radial-gradient(closest-side, rgba(102, 192, 244, .35), transparent); filter: blur(30px); z-index: -1; }
+        @keyframes bob { 50% { transform: translateY(-10px); } }
+        @media (max-width: 900px) {
+            .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+            .stage { max-width: 640px; width: 100%; margin-inline: auto; }
+        }
+
+        /* ── Marquee ── */
+        .marquee { border-block: 1px solid var(--line-soft); background: rgba(15, 21, 29, .6); overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+        .marquee-track { display: flex; width: max-content; animation: scroll 38s linear infinite; }
+        .marquee-track span { display: flex; align-items: center; gap: 12px; padding: 18px 30px; font: 600 15px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+        .marquee-track img { width: 22px; height: 22px; border-radius: 4px; }
+        .marquee-track i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); margin-left: 30px; }
+        @keyframes scroll { to { transform: translateX(-50%); } }
+
+        /* ── Bento ── */
+        .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+        .bento .card { display: flex; flex-direction: column; min-height: 320px; }
+        .bento .txt { padding: 26px 26px 0; display: flex; flex-direction: column; gap: 10px; }
+        .bento .txt p { margin: 0; color: var(--muted); font-size: 15.5px; }
+        .bento .tag { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; }
+        .bento .shot { margin-top: auto; padding: 22px 26px 0; }
+        .bento .shot img { border-radius: 10px 10px 0 0; border: 1px solid var(--line); border-bottom: 0; object-fit: cover; object-position: top; width: 100%; transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+        .bento .card:hover .shot img { transform: translateY(-6px); }
+        .b-hub { grid-column: span 4; } .b-hub .shot img { aspect-ratio: 16 / 7.4; }
+        .b-prof { grid-column: span 2; } .b-prof .shot img { aspect-ratio: 1 / 1.05; }
+        .b-act { grid-column: span 2; } .b-act .shot img { aspect-ratio: 1 / 1.05; object-position: 50% 0; }
+        .b-ana { grid-column: span 2; } .b-ana .shot img { aspect-ratio: 1 / 1.05; }
+        .b-ser { grid-column: span 2; } .b-ser .shot img { aspect-ratio: 1 / 1.05; }
+        .b-cmp { grid-column: span 3; } .b-cmp .shot img { aspect-ratio: 16 / 9; }
+        .b-adm { grid-column: span 3; } .b-adm .shot img { aspect-ratio: 16 / 9; }
+        .b-mini { grid-column: span 2; min-height: 0 !important; padding: 26px; gap: 12px; }
+        .b-mini .big { font: 800 40px/1 var(--display); color: var(--white); }
+        .b-mini p { margin: 0; color: var(--muted); font-size: 15px; }
+        @media (max-width: 960px) {
+            .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .b-hub, .b-cmp, .b-adm { grid-column: span 2; }
+            .b-prof, .b-act, .b-ana, .b-ser, .b-mini { grid-column: span 1; }
+        }
+        @media (max-width: 600px) {
+            .bento { grid-template-columns: minmax(0, 1fr); }
+            .bento > * { grid-column: span 1 !important; }
+            .bento .card { min-height: 0; }
+        }
+
+        /* ── Live demo ── */
+        .demo-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 999px; border: 1px solid var(--line-soft); background: rgba(15, 21, 29, .8); max-width: 100%; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tabs button, .seg button { flex: none; height: 36px; padding: 0 16px; border-radius: 999px; border: 0; background: transparent; color: var(--muted); font: 500 14px var(--body); cursor: pointer; transition: color .2s, background .2s; display: inline-flex; align-items: center; gap: 7px; }
+        .tabs button:hover, .seg button:hover { color: var(--white); }
+        .tabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--white); box-shadow: 0 0 0 1px var(--line) inset; }
+        .tabs img { width: 16px; height: 16px; border-radius: 3px; }
+        .seg { display: flex; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--line-soft); background: rgba(15, 21, 29, .8); }
+        .seg svg { width: 16px; height: 16px; }
+        .demo-stage { position: relative; display: grid; place-items: center; min-height: 600px; }
+        .demo-stage .halo { position: absolute; inset: 10% 15%; background: radial-gradient(closest-side, rgba(102, 192, 244, .22), transparent); filter: blur(40px); z-index: -1; }
+        .demo-phone { width: min(400px, 100%); }
+        .demo-phone .screen { position: relative; height: min(820px, 78vh); border-radius: 30px; overflow: hidden; background: #171a21; }
+        .demo-phone iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 0; }
+        .demo-desk { width: 100%; }
+        .demo-desk .screen { position: relative; overflow: hidden; background: #171a21; }
+        .demo-desk iframe { position: absolute; left: 0; top: 0; width: 1360px; height: 860px; border: 0; transform-origin: 0 0; }
+        .screen .loading { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(110deg, #171a21 30%, #1d2733 50%, #171a21 70%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; transition: opacity .4s; }
+        .screen .loading.gone { opacity: 0; pointer-events: none; }
+        @keyframes shimmer { to { background-position: -150% 0; } }
+        .demo-note { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 26px; }
+        .demo-open { color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+
+        /* ── How it works ── */
+        .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; position: relative; }
+        .flow::before { content: ""; position: absolute; left: 6%; right: 6%; top: 37px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--blue), var(--green), var(--text)); opacity: .35; }
+        .flow::after { content: ""; position: absolute; top: 33px; left: 6%; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 16px 4px rgba(102, 192, 244, .8); animation: pulse 5s cubic-bezier(.6, 0, .4, 1) infinite; }
+        @keyframes pulse { 0% { left: 6%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: calc(94% - 10px); opacity: 0; } }
+        .step { position: relative; padding: 0 4px; display: flex; flex-direction: column; gap: 12px; }
+        .step .dot { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); position: relative; z-index: 1; }
+        .step .dot svg { width: 30px; height: 30px; }
+        .step h3 { margin-top: 8px; }
+        .step p { margin: 0; color: var(--muted); font-size: 15.5px; }
+        @media (max-width: 860px) {
+            .flow { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+            .flow::before { left: 37px; right: auto; top: 20px; bottom: 20px; width: 2px; height: auto; background: linear-gradient(180deg, var(--gold), var(--blue), var(--green), var(--text)); }
+            .flow::after { display: none; }
+            .step { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; }
+            .step .dot { grid-row: span 3; }
+            .step h3 { margin-top: 4px; }
+        }
+
+        /* ── Setup ── */
+        .setup { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 48px; align-items: start; }
+        .setup ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
+        .setup li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 18px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-soft); transition: border-color .3s, transform .3s; }
+        .setup li:hover { border-color: var(--line); transform: translateX(4px); }
+        .setup li::before { content: counter(s, decimal-leading-zero); font: 700 15px var(--display); color: var(--blue); }
+        .setup li b { color: var(--white); font-weight: 600; display: block; }
+        .setup li span { color: var(--muted); font-size: 14.5px; }
+        .setup li em { font-style: normal; font: 600 12px var(--mono); color: var(--dim); }
+        @media (max-width: 860px) { .setup { grid-template-columns: minmax(0, 1fr); } }
+
+        /* ── Final CTA ── */
+        .final { text-align: center; border-radius: 24px; padding: clamp(48px, 7vw, 88px) 24px; position: relative; overflow: hidden; isolation: isolate; }
+        .final::before { content: ""; position: absolute; inset: -40%; z-index: -1; background: url(assets/art-fallback.webp) 0 0 / 520px auto; transform: rotate(-12deg); opacity: .08; animation: pan 60s linear infinite; }
+        .final::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(600px 300px at 50% 0%, rgba(102, 192, 244, .25), transparent), radial-gradient(500px 260px at 50% 100%, rgba(229, 177, 67, .14), transparent); }
+        @keyframes pan { to { background-position: 520px 380px; } }
+        .final img.crystal { width: 76px; height: 76px; margin: 0 auto 22px; animation: bob 6s ease-in-out infinite; }
+        .final .cta { justify-content: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><div class="glow a"></div><div class="glow b"></div><div class="glow c"></div></div>
+
+<header class="nav">
+    <div class="wrap">
+        <a class="brand" href="./"><img src="assets/favicon.svg" alt="">Savepoint</a>
+        <nav class="nav-links" aria-label="Sections">
+            <a href="#features">Features</a>
+            <a href="#demo">Live demo</a>
+            <a href="#how">How it works</a>
+            <a href="docs/">Docs</a>
+        </nav>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/yozuryu/savepoint-template">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.2-3.1-.1-.4-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.1 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+            GitHub
+        </a>
+    </div>
+</header>
+
+<main>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-copy">
+                <span class="pill reveal"><b>Free</b>Open source, MIT licensed</span>
+                <h1 class="reveal" style="--d:.05s">Every save.<br>Every platform.<br><span class="grad">Your own hub.</span></h1>
+                <p class="lede reveal" style="--d:.1s">Savepoint gathers your RetroAchievements, Steam and Xbox achievements, playtime and completions into one site that updates itself every hour, hosted free on your own GitHub.</p>
+                <div class="cta reveal" style="--d:.15s">
+                    <a class="btn btn-primary" href="https://github.com/yozuryu/savepoint-template/generate">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        Use the template
+                    </a>
+                    <a class="btn btn-ghost" href="#demo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+                        Try the live demo
+                    </a>
+                </div>
+                <div class="chips reveal" style="--d:.2s">
+                    <span class="chip"><img src="assets/icon-ra.png" alt="">RetroAchievements</span>
+                    <span class="chip"><img src="assets/icon-steam.png" alt="">Steam</span>
+                    <span class="chip"><img src="assets/icon-xbox.png" alt="">Xbox</span>
+                </div>
+            </div>
+            <div class="stage reveal" style="--d:.15s" aria-label="The Savepoint hub on desktop and phone">
+                <div class="halo"></div>
+                <div class="browser"><div class="bar"><i></i><i></i><i></i><span>you.github.io/savepoint</span></div><img src="assets/shots/d-hub.webp" alt="Savepoint hub on desktop: playing, series, platforms" width="1600" height="1000"></div>
+                <div class="phone"><img src="assets/shots/hub.webp" alt="Savepoint hub on a phone" width="600" height="1286"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+            <span><img src="assets/icon-ra.png" alt="">RetroAchievements<i></i></span><span><img src="assets/icon-steam.png" alt="">Steam<i></i></span><span><img src="assets/icon-xbox.png" alt="">Xbox via OpenXBL<i></i></span><span>GitHub Actions<i></i></span><span>GitHub Pages<i></i></span><span>Installable app<i></i></span><span>Hourly updates<i></i></span><span>No server<i></i></span>
+            <span><img src="assets/icon-ra.png" alt="">RetroAchievements<i></i></span><span><img src="assets/icon-steam.png" alt="">Steam<i></i></span><span><img src="assets/icon-xbox.png" alt="">Xbox via OpenXBL<i></i></span><span>GitHub Actions<i></i></span><span>GitHub Pages<i></i></span><span>Installable app<i></i></span><span>Hourly updates<i></i></span><span>No server<i></i></span>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow reveal">Features</span>
+                <h2 class="reveal">Everything you played, <span class="grad">in one place</span></h2>
+                <p class="lede reveal">Built for your phone first, and roomy on a big screen. Every page reads your own data, refreshed every hour.</p>
+            </div>
+            <div class="bento">
+                <article class="card b-hub reveal">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Hub</span><h3>Every platform on one screen</h3><p>The games in rotation, your series, the latest unlocks and each platform's headline numbers.</p></div>
+                    <div class="shot"><img src="assets/shots/d-hub.webp" alt="The hub on desktop" loading="lazy"></div>
+                </article>
+                <article class="card b-prof reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Profiles</span><h3>A full profile per platform</h3><p>Every game, achievement and rarity, with tabs for progress and series.</p></div>
+                    <div class="shot"><img src="assets/shots/ra.webp" alt="RetroAchievements profile" loading="lazy"></div>
+                </article>
+                <article class="card b-act reveal">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Activity</span><h3>What you played, and when</h3><p>Sessions from your playtime, unlocks day by day, the games in rotation.</p></div>
+                    <div class="shot"><img src="assets/shots/playing.webp" alt="Games in rotation" loading="lazy"></div>
+                </article>
+                <article class="card b-ana reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--green-hi)">Analytics</span><h3>Months of play in charts</h3><p>Any period against the one before: hours, peak times, top games.</p></div>
+                    <div class="shot"><img src="assets/shots/analytics.webp" alt="Analytics" loading="lazy"></div>
+                </article>
+                <article class="card b-ser reveal" style="--d:.1s">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Series</span><h3>Franchises across platforms</h3><p>Group games into series and sub-series, with progress for each.</p></div>
+                    <div class="shot"><img src="assets/shots/series.webp" alt="Series" loading="lazy"></div>
+                </article>
+                <article class="card b-cmp reveal">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Completions</span><h3>Mastered, perfect and beaten</h3><p>Every finished game from every platform on one timeline, with its rarest achievement.</p></div>
+                    <div class="shot"><img src="assets/shots/d-completions.webp" alt="Completions timeline" loading="lazy"></div>
+                </article>
+                <article class="card b-adm reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Admin panel</span><h3>Curate it from your computer</h3><p>Edit series, pick art, set win conditions, start data runs and publish. Never deployed.</p></div>
+                    <div class="shot"><img src="assets/shots/admin-config.webp" alt="Admin panel" loading="lazy"></div>
+                </article>
+                <article class="card b-mini reveal"><span class="big grad">Hourly</span><p>Fresh data every hour from GitHub Actions, or every 30 minutes with a free external cron.</p></article>
+                <article class="card b-mini reveal" style="--d:.05s"><span class="big grad">$0</span><p>Hosted on GitHub Pages. No server, no database, no account anywhere else.</p></article>
+                <article class="card b-mini reveal" style="--d:.1s"><span class="big grad">App</span><p>Install it on your phone from the browser; it opens full screen and works offline.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live demo -->
+    <section class="section" id="demo">
+        <div class="wrap">
+            <div class="section-head center">
+                <span class="eyebrow reveal">Live demo</span>
+                <h2 class="reveal">Not a mock-up. <span class="grad">A real hub.</span></h2>
+                <p class="lede reveal">This is the author's own Savepoint, running live. Tap around: open a game, switch tabs, scroll the activity.</p>
+            </div>
+            <div class="demo-bar reveal">
+                <div class="tabs" role="group" aria-label="Page">
+                    <button type="button" data-page="" aria-pressed="true">Hub</button>
+                    <button type="button" data-page="profile/ra/"><img src="assets/icon-ra.png" alt="">RetroAchievements</button>
+                    <button type="button" data-page="profile/steam/"><img src="assets/icon-steam.png" alt="">Steam</button>
+                    <button type="button" data-page="profile/xbox/"><img src="assets/icon-xbox.png" alt="">Xbox</button>
+                    <button type="button" data-page="activity/">Activity</button>
+                    <button type="button" data-page="analytics/">Analytics</button>
+                    <button type="button" data-page="completions/">Completions</button>
+                    <button type="button" data-page="series/">Series</button>
+                </div>
+                <div class="seg" role="group" aria-label="Device">
+                    <button type="button" data-device="phone" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>Phone</button>
+                    <button type="button" data-device="desktop" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Desktop</button>
+                </div>
+            </div>
+            <div class="demo-stage reveal" id="demo-stage">
+                <div class="halo"></div>
+                <div class="phone demo-phone" id="demo-phone"><div class="screen"><div class="loading" aria-hidden="true"></div><iframe id="demo-frame-phone" title="Live Savepoint hub, phone view" loading="lazy"></iframe></div></div>
+                <div class="browser demo-desk" id="demo-desk" hidden><div class="bar"><i></i><i></i><i></i><span id="demo-url">yozuryu.github.io/gaming-hub</span></div><div class="screen" id="demo-desk-screen"><div class="loading" aria-hidden="true"></div><iframe id="demo-frame-desk" title="Live Savepoint hub, desktop view" loading="lazy"></iframe></div></div>
+            </div>
+            <div class="demo-note">
+                <a class="demo-open" id="demo-open" href="https://yozuryu.github.io/gaming-hub/" target="_blank" rel="noopener">Open it in its own tab
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow reveal">How it works</span>
+                <h2 class="reveal">No server. <span class="grad">Just your GitHub repository.</span></h2>
+                <p class="lede reveal">Everything runs on free GitHub features. Your keys stay in encrypted secrets; the site is plain files that read your data.</p>
+            </div>
+            <div class="flow">
+                <div class="step reveal">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#e5b143" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2"/></svg></div>
+                    <h3>Your API keys</h3><p>RetroAchievements, Steam and OpenXBL keys go into your repository's Actions secrets.</p>
+                </div>
+                <div class="step reveal" style="--d:.08s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#66c0f4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                    <h3>GitHub Actions</h3><p>Every hour it fetches your profiles and commits only what changed to a <code>data</code> branch.</p>
+                </div>
+                <div class="step reveal" style="--d:.16s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6cc85e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg></div>
+                    <h3>GitHub Pages</h3><p>When data changed, the site is deployed with it. Free for public repositories.</p>
+                </div>
+                <div class="step reveal" style="--d:.24s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#c6d4df" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+                    <h3>Your phone</h3><p>Open it anywhere, or install it as an app. It refreshes itself in the background.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setup -->
+    <section class="section" id="setup">
+        <div class="wrap setup">
+            <div class="section-head" style="margin:0;position:sticky;top:110px">
+                <span class="eyebrow reveal">Setup</span>
+                <h2 class="reveal">Live in about <span class="grad">fifteen minutes</span></h2>
+                <p class="lede reveal">All in the browser, nothing to install. The docs walk you through each step and fill in your own names as you go.</p>
+                <div class="cta reveal"><a class="btn btn-primary" href="docs/">Open the setup guide</a></div>
+            </div>
+            <ol>
+                <li class="reveal"><div><b>Create your repository</b><span>Use this template, name it <code>savepoint</code></span></div><em>1 min</em></li>
+                <li class="reveal" style="--d:.04s"><div><b>Turn on GitHub Pages</b><span>Source: GitHub Actions</span></div><em>1 min</em></li>
+                <li class="reveal" style="--d:.08s"><div><b>Get your API keys</b><span>RetroAchievements, Steam, OpenXBL: only the ones you use</span></div><em>5 min</em></li>
+                <li class="reveal" style="--d:.12s"><div><b>Add them as secrets</b><span>Settings → Secrets and variables → Actions</span></div><em>2 min</em></li>
+                <li class="reveal" style="--d:.16s"><div><b>Make it yours</b><span>Name, motto, tags and platforms in <code>config.json</code></span></div><em>2 min</em></li>
+                <li class="reveal" style="--d:.2s"><div><b>Run the first fetch</b><span>Actions → Fetch Data → Run workflow</span></div><em>5 min</em></li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Final -->
+    <section class="section" style="padding-top:0">
+        <div class="wrap">
+            <div class="final edge reveal">
+                <img class="crystal" src="assets/favicon.svg" alt="">
+                <h2>Your progress deserves<br><span class="grad">a save point.</span></h2>
+                <p class="lede" style="margin:18px auto 0">Free, open source and yours: the code, the data and the address.</p>
+                <div class="cta">
+                    <a class="btn btn-primary" href="https://github.com/yozuryu/savepoint-template/generate">Use the template</a>
+                    <a class="btn btn-ghost" href="docs/">Read the docs</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="wrap">
+        <a class="brand" href="./" style="font-size:17px"><img src="assets/favicon.svg" alt="" style="width:24px;height:24px">Savepoint</a>
+        <a href="docs/">Docs</a>
+        <a href="https://github.com/yozuryu/savepoint-template">Template on GitHub</a>
+        <a href="https://github.com/yozuryu/savepoint-template/blob/main/LICENSE">MIT license</a>
+        <p class="fine">Not affiliated with RetroAchievements, Valve, Microsoft or OpenXBL. Game names and art belong to their owners and load from the platforms' own servers.</p>
+    </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>
