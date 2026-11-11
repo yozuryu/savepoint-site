@@ -1,4 +1,4 @@
-// Savepoint site: scroll reveals, the pointer light on cards, copy buttons, and the live demo.
+// Savepoint site: scroll reveals, the pointer light on cards, copy buttons, the hero feed and the live demo.
 (function () {
     const root = document.documentElement;
     root.classList.add('js');
@@ -44,6 +44,73 @@
         box.append(b);
     });
     addCopyButtons();
+
+    // ── Hero feed: the hub taking an hourly update. Plays the newest real unlocks from the live hub
+    // (two per game at most, so it shows a mix), one arriving every few seconds while the hero is on screen ──
+    const feed = document.getElementById("feed");
+    if (feed) {
+        const list = document.getElementById("feed-list"), status = document.getElementById("feed-st");
+        const DATA = "https://yozuryu.github.io/gaming-hub/data/";
+        const FALLBACK = [{"p":"ra","n":"Corrupted Companion Freed","g":"Final Fantasy Crystal Chronicles: Ring of Fates","i":"https://media.retroachievements.org/Badge/614934.png","v":5},{"p":"ra","n":"Who Keeps Precious Objects in Barrels?","g":"Final Fantasy Crystal Chronicles: Ring of Fates","i":"https://media.retroachievements.org/Badge/614954.png","v":5},{"p":"steam","n":"The Artist Within","g":"SpongeBob SquarePants™: The Patrick Star Game","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2322380/b245962141c9669bb20a21ba27555345f47a561b.jpg","v":38.9},{"p":"steam","n":"Sunday, Sunday, Sunday","g":"SpongeBob SquarePants™: The Patrick Star Game","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2322380/a639220b40c5915d50085b5aa33e491a15b37333.jpg","v":26.9},{"p":"steam","n":"Partners?","g":"Eiyuden Chronicle: Rising","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1658290/f11f05dd5563baa760d0451753feeb410a70dd9d.jpg","v":60.8},{"p":"steam","n":"The Road to Recovery","g":"Eiyuden Chronicle: Rising","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1658290/698113d14201052b0919e671e6e7a7b5f48cb717.jpg","v":61.3},{"p":"steam","n":"To the Depths!","g":"Little Noah: Scion of Paradise","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1883260/27ac78d5cf95a012efaabcdc8db00df3fe35900c.jpg","v":56.6},{"p":"steam","n":"Master Locksmith","g":"Little Noah: Scion of Paradise","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1883260/b8c5fe5786916dcfeb6b9b23a831665764a7700d.jpg","v":50.1},{"p":"steam","n":"Cryptographer","g":"FEZ","i":"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/224760/6fe291fa8d05d79cc83528c0d20917059960a2b6.jpg","v":25.7}];
+        const pick = all => {
+            const per = {}, out = [];
+            for (const x of all.sort((a, b) => (a.t < b.t ? 1 : -1))) {
+                if ((per[x.g] = (per[x.g] || 0) + 1) > 2) continue;
+                out.push(x);
+                if (out.length === 9) break;
+            }
+            return out;
+        };
+        const fetchLive = async () => {
+            const [ra, st] = await Promise.all(["ra", "steam"].map(p => fetch(DATA + p + "/achievements/1.json").then(r => r.json())));
+            return pick([
+                ...ra.recentAchievements.map(a => ({ p: "ra", t: a.date.replace(" ", "T") + "Z", n: a.title, g: a.gameTitle, i: "https://media.retroachievements.org" + a.badgeUrl, v: a.points })),
+                ...st.recentAchievements.map(a => ({ p: "steam", t: a.unlockedAt, n: a.displayName, g: a.gameName, i: a.iconUrl, v: a.globalPct })),
+            ]);
+        };
+        const row = x => {
+            const li = document.createElement("li");
+            const icon = document.createElement("img");
+            icon.src = x.i; icon.alt = ""; icon.loading = "lazy";
+            if (x.p === "steam") icon.className = "st-icon";
+            const txt = document.createElement("div");
+            const b = document.createElement("b"); b.textContent = x.n;
+            const s = document.createElement("span"); s.textContent = x.g;
+            txt.append(b, s);
+            const em = document.createElement("em");
+            const pi = document.createElement("img"); pi.alt = ""; pi.src = "assets/icon-" + x.p + ".png";
+            em.append(pi, x.p === "ra" ? "+" + x.v : x.v + "%");
+            if (x.p === "ra") em.className = "pts";
+            li.append(icon, txt, em);
+            return li;
+        };
+        const SHOWN = 3;
+        let items = FALLBACK, next = 0, timer = 0, onScreen = false;
+        const start = () => {
+            // Oldest of the newest go in first, so the real newest unlock is the last to arrive
+            items = items.slice().reverse();
+            // Reduced motion: no arrivals, just the real newest three
+            list.replaceChildren(...(reduced ? items.slice(-SHOWN) : items.slice(0, SHOWN)).reverse().map(row));
+            next = SHOWN % items.length;
+        };
+        const tick = () => {
+            feed.classList.add("busy"); status.textContent = "Syncing…";
+            timer = setTimeout(() => {
+                const li = row(items[next]); li.classList.add("new");
+                list.prepend(li);
+                const old = list.children[SHOWN];
+                if (old) { old.classList.add("out"); setTimeout(() => old.remove(), 500); }
+                next = (next + 1) % items.length;
+                feed.classList.remove("busy"); status.textContent = "Synced · just now";
+                timer = setTimeout(tick, 3600);
+            }, 1300);
+        };
+        const run = () => { clearTimeout(timer); if (onScreen && !document.hidden && !reduced) timer = setTimeout(tick, 1600); };
+        start();
+        fetchLive().then(live => { if (live.length >= SHOWN) { items = live; start(); } }).catch(() => {});
+        new IntersectionObserver(e => { onScreen = e[0].isIntersecting; run(); }).observe(feed);
+        document.addEventListener("visibilitychange", run);
+    }
 
     // ── Live demo: the author's real hub in a phone or a scaled desktop window ──
     const stage = document.getElementById('demo-stage');

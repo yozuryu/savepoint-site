@@ -25,7 +25,7 @@
         .rail a .tick { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none; display: grid; place-items: center; transition: background .2s, border-color .2s; }
         .rail a .tick.done { background: var(--green); border-color: var(--green); }
         .rail a .tick.done::after { content: ""; width: 7px; height: 4px; border: solid #0b0f15; border-width: 0 0 2px 2px; transform: rotate(-45deg) translateY(-1px); }
-        .meter { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-soft); }
+        .meter { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line-soft); }
         .meter b { font: 700 15px var(--display); color: var(--white); }
         .meter .bar { height: 6px; border-radius: 99px; background: var(--line-soft); overflow: hidden; }
         .meter .bar i { display: block; height: 100%; width: 0; background: var(--grad); border-radius: inherit; transition: width .5s cubic-bezier(.2, .7, .2, 1); }
@@ -69,7 +69,7 @@
 
         /* Tabs for the three platforms */
         .ptabs { display: flex; gap: 6px; margin: 18px 0 0; flex-wrap: wrap; }
-        .ptab { display: none; padding: 20px; border-radius: 0 12px 12px 12px; background: var(--surface); border: 1px solid var(--line-soft); }
+        .ptab { display: none; padding: 20px; border-radius: 0 12px 12px 12px; background: var(--glass); border: 1px solid var(--line-soft); }
         .ptab.on { display: block; }
         .ptab ol { margin: 0; }
 
@@ -103,7 +103,7 @@
         .preview .plats img { width: 13px; height: 13px; }
         @media (max-width: 760px) { .builder { grid-template-columns: minmax(0, 1fr); } }
 
-        details { border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface); margin: 10px 0; }
+        details { border: 1px solid var(--line-soft); border-radius: 12px; background: var(--glass); margin: 10px 0; }
         details summary { cursor: pointer; padding: 14px 18px; font-weight: 600; color: var(--white); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
         details summary::-webkit-details-marker { display: none; }
         details summary::after { content: "+"; color: var(--blue); font: 600 20px/1 var(--display); transition: transform .3s; }
@@ -126,7 +126,7 @@
     </style>
 </head>
 <body>
-<div class="sky" aria-hidden="true"><div class="glow a"></div><div class="glow b"></div><div class="glow c"></div><div class="glow d"></div></div>
+<div class="sky" aria-hidden="true"><div class="glow a"></div><div class="glow b"></div><div class="glow c"></div><div class="glow d"></div><div class="glow e"></div></div>
 
 <header class="nav">
     <div class="wrap">
