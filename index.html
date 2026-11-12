@@ -20,7 +20,7 @@
     <script>document.documentElement.classList.add('js')</script>
     <style>
         /* ── Hero ── */
-        .hero { padding-block: clamp(48px, 8vw, 96px) clamp(64px, 9vw, 120px); }
+        .hero { padding-block: clamp(48px, 8vw, 96px) clamp(64px, 9vw, 120px); overflow-x: clip; }   /* the desktop shot bleeds past its column; never past the page */
         .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 40px; align-items: center; }
         .hero-copy { display: flex; flex-direction: column; gap: 26px; align-items: flex-start; }
         .hero h1 { font-size: clamp(40px, 4.6vw, 64px); line-height: .95; font-weight: 800; }
@@ -31,7 +31,10 @@
         .stage .shot-d { position: absolute; left: 14%; top: 4%; width: 92%; border: 1px solid var(--line); border-radius: 12px; aspect-ratio: 1440 / 880; object-fit: cover; object-position: top left;
             -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 92%), linear-gradient(to right, #000 55%, transparent 96%); -webkit-mask-composite: source-in;
             mask-image: linear-gradient(to bottom, #000 45%, transparent 92%), linear-gradient(to right, #000 55%, transparent 96%); mask-composite: intersect; }
-        .stage .phone { position: absolute; left: 0; top: 28%; width: 30%; z-index: 2; }
+        /* The hero phone scales with the stage, so its corners and frame do too (cqw = 1% of the stage width) */
+        .stage { container-type: inline-size; }
+        .stage .phone { position: absolute; left: 0; top: 28%; width: 30%; z-index: 2; --r: clamp(12px, 4cqw, 30px); --pad: clamp(3px, .8cqw, 7px); border-radius: var(--r); padding: var(--pad); }
+        .stage .phone img { border-radius: calc(var(--r) - var(--pad)); }
         .stage .halo { position: absolute; inset: 10% 0 0 20%; border-radius: 50%; background: radial-gradient(closest-side, rgba(102, 192, 244, .22), transparent); filter: blur(30px); z-index: -1; }
 
         /* Live feed: the hub receiving an hourly update, played from the real newest unlocks */
@@ -75,7 +78,7 @@
         .bento .shot { margin-top: auto; padding: 22px 26px 0; }
         .bento .shot img { border-radius: 10px 10px 0 0; border: 1px solid var(--line); border-bottom: 0; object-fit: cover; object-position: top; width: 100%; transition: transform .6s cubic-bezier(.2, .7, .2, 1); -webkit-mask-image: linear-gradient(#000 50%, transparent); mask-image: linear-gradient(#000 50%, transparent); }
         .bento .card:hover .shot img { transform: translateY(-6px); }
-        .b-hub { grid-column: span 4; } .b-hub .shot img { aspect-ratio: 16 / 7.4; }
+        .b-wide { grid-column: span 4; } .b-wide .shot img { aspect-ratio: 16 / 7.4; }
         .b-prof { grid-column: span 2; } .b-prof .shot img { aspect-ratio: 1 / 1.05; }
         .b-act { grid-column: span 2; } .b-act .shot img { aspect-ratio: 1 / 1.05; object-position: 50% 0; }
         .b-ana { grid-column: span 2; } .b-ana .shot img { aspect-ratio: 1 / 1.05; }
@@ -83,22 +86,205 @@
         .b-cmp { grid-column: span 3; } .b-cmp .shot img { aspect-ratio: 16 / 9; }
         .b-adm { grid-column: span 3; } .b-adm .shot img { aspect-ratio: 16 / 9; }
         .b-mini { grid-column: span 2; min-height: 0 !important; padding: 26px; gap: 12px; }
+        .b-hourly { grid-column: span 4; grid-row: span 2; display: grid !important; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 26px; align-items: center; }
+        .b-hourly .txt2 { display: flex; flex-direction: column; gap: 12px; }
+        .heat { display: flex; flex-direction: column; gap: 10px; }
+        .heat-grid { display: grid; grid-template-rows: repeat(7, minmax(0, 1fr)); grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; }
+        .heat-grid i { aspect-ratio: 1; border-radius: 3px; background: var(--line-soft); }
+        .heat-grid i[data-l="1"] { background: rgba(102, 192, 244, .3); }
+        .heat-grid i[data-l="2"] { background: rgba(102, 192, 244, .55); }
+        .heat-grid i[data-l="3"] { background: rgba(102, 192, 244, .8); }
+        .heat-grid i[data-l="4"] { background: var(--blue); box-shadow: 0 0 8px rgba(102, 192, 244, .5); }
+        .js .heat-grid i { opacity: 0; transform: scale(.5); transition: opacity .4s, transform .4s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--c) * 45ms + var(--r) * 12ms); }
+        .js .heat-grid.on i { opacity: 1; transform: none; }
+        .heat-meta { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+        .heat-meta b { color: var(--white); font-weight: 600; }
         .b-mini .big { font: 800 40px/1 var(--display); color: var(--white); }
         .b-mini p { margin: 0; color: var(--muted); font-size: 15px; }
         @media (max-width: 960px) {
             .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .b-hub, .b-cmp, .b-adm { grid-column: span 2; }
+            .b-wide, .b-cmp, .b-adm { grid-column: span 2; }
             .b-prof, .b-act, .b-ana, .b-ser, .b-mini { grid-column: span 1; }
-            .b-mini:last-child { grid-column: span 2; }
+            .b-hourly { grid-column: span 2 !important; grid-row: auto; }
+        }
+        /* Phone: a quick look, two across and text only; the tabs above carry the pictures */
+        @media (max-width: 600px) {
+            .bento > * { grid-column: span 1 !important; }
+            .bento > .b-wide, .bento > .b-hourly { grid-column: span 2 !important; }
+            .bento .card { min-height: 0; }
+            .bento .shot { display: none; }
+            .bento .txt { padding: 18px 16px; gap: 8px; }
+            .bento .txt h3 { font-size: 16.5px; line-height: 1.25; }
+            .bento .txt p, .b-mini p { font-size: 14px; line-height: 1.5; }
+            .bento .tag { font-size: 11px; letter-spacing: .14em; }
+            .b-mini { padding: 18px 16px !important; }
+            .b-mini .big { font-size: 30px; }
+            .b-hourly { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        /* ── Analytics: the best of the Analytics page from live data, one panel divided by hairlines.
+           Desktop: recap across the top, the rhythm clock and the top game beside it, two highlight cards under the clock ── */
+        .pill.live { padding-left: 12px; align-self: flex-start; }
+        .pill.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--green-hi); box-shadow: 0 0 0 3px rgba(108, 200, 94, .15); }
+        .ana { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "recap recap recap recap" "rhythm rhythm top top" "rare story top top"; border-top: 1px solid var(--line-soft); border-left: 1px solid var(--line-soft); border-radius: var(--r); overflow: hidden; }
+        .ana > * { padding: clamp(20px, 2.6vw, 30px); border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); min-width: 0; }
+        .ana-recap { grid-area: recap; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 36px; padding-block: 18px !important; }
+        .ana-recap > span { display: inline-flex; align-items: baseline; gap: 8px; color: var(--muted); font-size: 15px; }
+        .ana-recap b { font: 700 26px/1 var(--display); color: var(--white); font-variant-numeric: tabular-nums; }
+        .ana-recap .key { margin-left: auto; align-items: center; font-size: 13px; color: var(--dim); }
+        .ana-recap .key > span { display: inline-flex; flex-direction: column; line-height: 1; }
+        .d { font: 600 12px var(--mono); font-style: normal; color: var(--dim); }
+        .d.up { color: var(--green-hi); } .d.down { color: #f07c6c; }
+        .ana-recap .key .d { font-size: 10px; }
+        .tagline { font: 600 12px var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+
+        .ana-rhythm { grid-area: rhythm; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 26px; align-items: center; }
+        .ana-clock { width: 100%; max-width: 260px; justify-self: center; overflow: visible; }
+        .ana-clock path { transition: opacity .5s, transform .5s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--h) * 28ms); transform-origin: 60px 60px; }
+        .ana-clock .tick, .ana-clock .mid { transition: opacity .6s .8s; }
+        .js .ana:not(.on) .ana-clock path { opacity: 0; transform: scale(.92); }
+        .js .ana:not(.on) .ana-clock .tick, .js .ana:not(.on) .ana-clock .mid { opacity: 0; }
+        .ana-facts { margin: 0; display: grid; gap: 14px; }
+        .ana-facts div { display: grid; gap: 2px; }
+        .ana-facts dt { font-size: 13px; color: var(--dim); }
+        .ana-facts dd { margin: 0; color: var(--white); font: 600 17px var(--body); }
+        .ana-facts dd span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 6px; }
+
+        /* Top game: its art behind, fading into the panel */
+        .ana-top { grid-area: top; position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; min-height: 300px; }
+        .ana-top .art { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; object-fit: cover; opacity: .55; -webkit-mask-image: linear-gradient(#000 20%, transparent 85%); mask-image: linear-gradient(#000 20%, transparent 85%); }
+        .ana-top .art.mosaic { object-fit: none; opacity: .18; }
+        .ana-top .who { display: flex; align-items: center; gap: 14px; }
+        .ana-top .who img { width: 52px; height: 52px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface-2); }
+        .ana-top .who b { display: block; color: var(--white); font: 700 clamp(19px, 2vw, 24px)/1.2 var(--display); }
+        .ana-top .who span { color: var(--muted); font-size: 14.5px; }
+        .ana-top .who span b { display: inline; font: 600 14.5px var(--body); color: var(--blue); }
+        .share { height: 6px; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
+        .share i { display: block; height: 100%; border-radius: 3px; background: var(--blue); box-shadow: 0 0 10px rgba(102, 192, 244, .6); transform-origin: left; transition: transform 1s cubic-bezier(.2, .7, .2, 1) .4s; }
+        .js .ana:not(.on) .share i { transform: scaleX(0); }
+
+        /* Highlight cards: rarest unlock, a comeback or a binge */
+        .ana-card { display: flex; flex-direction: column; gap: 14px; }
+        #ana-rare { grid-area: rare; } #ana-story { grid-area: story; }
+        .ana-card .row { display: flex; gap: 14px; align-items: center; }
+        .ana-card .row img { width: 48px; height: 48px; border-radius: 6px; flex: none; border: 2px solid var(--line); background: var(--surface-2); }
+        .ana-card .row b { display: block; color: var(--white); font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .ana-card .row span { display: block; color: var(--dim); font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ana-card .big { font: 700 22px/1.15 var(--display); color: var(--white); }
+        .ana-card .big + span { color: var(--muted); font-size: 14px; margin-top: -8px; }
+        img.px { image-rendering: pixelated; }
+        @media (max-width: 960px) {
+            .ana { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "recap recap" "rhythm rhythm" "top top" "rare story"; }
         }
         @media (max-width: 600px) {
-            .bento { grid-template-columns: minmax(0, 1fr); }
-            .bento > * { grid-column: span 1 !important; }
-            .bento .card { min-height: 0; }
+            .ana { grid-template-columns: minmax(0, 1fr); grid-template-areas: "recap" "rhythm" "top" "rare" "story"; }
+            .ana-rhythm { grid-template-columns: minmax(0, 1fr); }
+            .ana-clock { max-width: 230px; }
+            .ana-facts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+            .ana-recap { gap: 10px 24px; }
+            .ana-recap .key { margin-left: 0; }
+            .ana-top { min-height: 240px; }
+        }
+
+        /* ── Feature tabs: Overview is the grid; each other tab is one insight from live data, built like the hero
+           (the page's screenshot fading out, a small panel of real data on it) ── */
+        /* Pinned under the top bar while inside Features (sticky ends with the section) */
+        .ftabs { margin-bottom: 28px; width: max-content; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 74px); z-index: 20; background: rgba(13, 19, 27, .88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .fpanel:not([hidden]) { animation: fpanel .45s cubic-bezier(.2, .7, .2, 1) backwards; }
+        @keyframes fpanel { from { opacity: 0; transform: translateY(8px); } }
+        .tab-intro { display: flex; flex-direction: column; gap: 12px; margin-bottom: 26px; max-width: 70ch; }
+        .tab-intro h3 { font-size: clamp(22px, 2.4vw, 30px); }
+        .tab-intro p { margin: 0; color: var(--muted); }
+        .show { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: 40px; align-items: center; }
+        .show-copy { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+        .show-copy .tag { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; }
+        .show-copy h3 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.15; }
+        .show-copy p { margin: 0; color: var(--muted); }
+        .show-demo { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 500; }
+        .show-stage { position: relative; aspect-ratio: 1.35; }
+        .show-shot { position: absolute; left: 0; top: 0; width: 100%; border: 1px solid var(--line); border-radius: 12px; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left;
+            -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 88%), linear-gradient(to right, #000 50%, transparent 95%); -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(to bottom, #000 35%, transparent 88%), linear-gradient(to right, #000 50%, transparent 95%); mask-composite: intersect; }
+        .show-card { right: 0; bottom: 0; width: 66%; }
+        .show-card .feed-head .st img { width: 14px; height: 14px; border-radius: 3px; }
+        /* Sessions: rows slide in one after another, each bar grows to its length */
+        .sess { list-style: none; margin: 0; padding: 6px 0; }
+        .sess li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 3px 11px; align-items: center; padding: 7px 14px; }
+        .sess .when { grid-column: 2 / 4; }
+        .sess img { width: 34px; height: 34px; border-radius: 5px; grid-row: 1 / 4; background: var(--surface-2); }
+        .sess b { color: var(--white); font: 600 13.5px/1.3 var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sess em { font: 600 12.5px var(--mono); font-style: normal; color: var(--blue); text-align: right; }
+        .sess .when { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sess .bar { grid-column: 2 / 4; height: 3px; border-radius: 2px; background: var(--line-soft); overflow: hidden; }
+        .sess .bar i { display: block; height: 100%; background: var(--blue); border-radius: 2px; transform-origin: left; }
+        .sess li[data-p="ra"] em { color: var(--gold); } .sess li[data-p="ra"] .bar i { background: var(--gold); }
+        .js .play:not(.on) .sess li { opacity: 0; transform: translateY(-6px); }
+        .js .play:not(.on) .sess .bar i { transform: scaleX(0); }
+        .sess li { transition: opacity .5s, transform .5s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--i) * 120ms); }
+        .sess .bar i { transition: transform .8s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--i) * 120ms + 250ms); }
+        /* Completions: the newest lands as a card in its tier colour, the count goes up by one */
+        .cmp-new { margin: 12px 14px 4px; border-radius: 10px; overflow: hidden; position: relative; border: 2px solid var(--gold); box-shadow: 0 0 22px -6px rgba(229, 177, 67, .6); transition: transform .6s cubic-bezier(.2, .7, .2, 1) .2s, opacity .6s .2s, box-shadow 1.2s .5s; }
+        .cmp-new.beaten { border-color: #b8c4ce; box-shadow: 0 0 18px -8px rgba(184, 196, 206, .5); }
+        .cmp-new img { display: block; width: 100%; aspect-ratio: 16 / 6.5; object-fit: cover; }
+        .cmp-new img.px { object-fit: cover; image-rendering: pixelated; }
+        .cmp-new .cap { position: absolute; inset: auto 0 0; padding: 26px 12px 9px; background: linear-gradient(transparent, rgba(8, 11, 16, .92)); display: grid; gap: 2px; }
+        .cmp-new .cap b { color: var(--white); font: 600 14px var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cmp-new .cap span { font-size: 12px; color: var(--muted); }
+        .tier { justify-self: start; font: 700 10px var(--display); letter-spacing: .14em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; background: rgba(229, 177, 67, .18); color: var(--gold-hi); }
+        .tier.beaten { background: #2a3440; color: #c6d4df; }
+        .js .play:not(.on) .cmp-new { transform: scale(.94) translateY(6px); opacity: 0; box-shadow: none; }
+        .cmp-rest { list-style: none; margin: 0; padding: 6px 0 8px; }
+        .cmp-rest li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 5px 14px; font-size: 13px; }
+        .feed .cmp-rest img { width: 28px; height: 28px; border-radius: 4px; border: 1.5px solid var(--gold); object-fit: cover; }
+        .cmp-rest li.beaten img { border-color: #b8c4ce; }
+        .cmp-rest b { color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cmp-rest span { color: var(--dim); font-size: 12px; white-space: nowrap; }
+        .count b { color: var(--gold); font: 600 13px var(--mono); display: inline-block; }
+        /* Loops: a new completion lands, the count bumps when it's gold tier, swapped content fades in */
+        .cmp-new.arrive { animation: cmp-in .7s cubic-bezier(.2, .7, .2, 1) backwards; }
+        @keyframes cmp-in { from { opacity: 0; transform: scale(.94) translateY(8px); box-shadow: none; } }
+        .count b.bump { animation: bump .9s ease-out .35s backwards; }
+        @keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.35); color: var(--gold-hi); text-shadow: 0 0 12px rgba(245, 210, 122, .8); } 100% { transform: scale(1); } }
+        .swap, .swap > * { animation: fpanel .5s cubic-bezier(.2, .7, .2, 1) backwards; }
+        .ana-card.swap > *:nth-child(2) { animation-delay: .06s; } .ana-card.swap > *:nth-child(n+3) { animation-delay: .12s; }
+        .tagline .n { font-style: normal; color: var(--line); margin-left: 6px; letter-spacing: .08em; }
+        /* Series: one segment per game lights up in turn (gold finished, silver beaten, blue started, lit to its %) */
+        .ser-art { height: 92px; position: relative; overflow: hidden; }
+        .ser-art img { width: 100%; height: 100%; object-fit: cover; opacity: .55; -webkit-mask-image: linear-gradient(#000 30%, transparent); mask-image: linear-gradient(#000 30%, transparent); }
+        .ser-art b { position: absolute; left: 14px; bottom: 8px; color: var(--white); font: 700 20px var(--display); text-shadow: 0 2px 10px rgba(0, 0, 0, .7); }
+        .ser-body { padding: 4px 14px 14px; display: grid; gap: 12px; }
+        .segs { display: flex; gap: 3px; height: 10px; }
+        .segs i { flex: 1; border-radius: 2px; background: var(--line-soft); position: relative; overflow: hidden; transition: opacity .4s, transform .4s; transition-delay: calc(var(--i) * 70ms); }
+        .segs i::after { content: ""; position: absolute; inset: 0; width: var(--w, 0%); background: var(--c, transparent); }
+        .js .play:not(.on) .segs i { opacity: .2; transform: scaleY(.4); }
+        .ser-icons { display: flex; gap: 5px; overflow: hidden; }
+        .ser-icons img { width: 30px; height: 30px; border-radius: 4px; flex: none; border: 1.5px solid var(--line); background: var(--surface-2); object-fit: cover; }
+        .ser-stats { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+        .ser-stats b { color: var(--white); font-weight: 600; }
+        .ser-stats i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+        /* Narrow: no room for the overlap, so the card stands alone (the demo link leads to the page itself) */
+        @media (max-width: 860px) {
+            .show { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+            .show-stage { aspect-ratio: auto; max-width: 520px; width: 100%; }
+            .show-shot { display: none; }
+            .show-card { position: relative; width: 100%; }
+        }
+        @media (max-width: 600px) {
+            .ftabs { width: auto; top: calc(env(safe-area-inset-top, 0px) + 70px); padding: 3px; margin-bottom: 22px; }
+            .tabs.ftabs button { height: 32px; padding: 0 13px; font-size: 13.5px; }
         }
 
         /* ── Live demo ── */
         .demo-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        @media (min-width: 1024px) {
+            .demo-body.is-phone { display: grid; grid-template-columns: minmax(0, 1fr) 260px min(400px, calc((100vh - 120px) * .46)) minmax(0, 1fr); grid-template-areas: ". bar stage ." ". note stage ."; column-gap: 56px; }
+            .demo-body.is-phone .demo-bar { grid-area: bar; flex-direction: column; align-items: stretch; margin: 0; align-self: end; gap: 14px; }
+            .demo-body.is-phone .tabs { flex-direction: column; border-radius: 18px; padding: 6px; }
+            .demo-body.is-phone .tabs button { justify-content: flex-start; }
+            .demo-body.is-phone .seg { align-self: flex-start; }
+            .demo-body.is-phone .demo-stage { grid-area: stage; min-height: 0; }
+            .demo-body.is-phone .demo-note { grid-area: note; justify-content: flex-start; align-self: start; margin-top: 16px; }
+        }
         .tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px; border-radius: 999px; border: 1px solid var(--line-soft); background: rgba(15, 21, 29, .8); max-width: 100%; }
         .tabs::-webkit-scrollbar { display: none; }
         .tabs button, .seg button { flex: none; height: 36px; padding: 0 16px; border-radius: 999px; border: 0; background: transparent; color: var(--muted); font: 500 14px var(--body); cursor: pointer; transition: color .2s, background .2s; display: inline-flex; align-items: center; gap: 7px; }
@@ -109,9 +295,10 @@
         .seg svg { width: 16px; height: 16px; }
         .demo-stage { position: relative; display: grid; place-items: center; min-height: 600px; }
         .demo-stage .halo { position: absolute; inset: 10% 15%; background: radial-gradient(closest-side, rgba(102, 192, 244, .22), transparent); filter: blur(40px); z-index: -1; }
-        .demo-phone { width: min(400px, 100%); }
-        .demo-phone .screen { position: relative; height: min(820px, 78vh); border-radius: 30px; overflow: hidden; background: #171a21; }
-        .demo-phone iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 0; }
+        /* A real phone shape (9:19.5). When the window is too short for that at 400px wide, the phone gets narrower instead of squatter */
+        .demo-phone { width: min(400px, 100%, calc((100vh - 120px) * 0.46)); }
+        .demo-phone .screen { position: relative; aspect-ratio: 9 / 19.5; border-radius: 30px; overflow: hidden; background: #171a21; }
+        .demo-phone iframe { position: absolute; left: 0; top: 0; width: 400px; height: 866.67px; border: 0; border-radius: 0; transform-origin: 0 0; }
         .demo-desk { width: 100%; }
         .demo-desk .screen { position: relative; overflow: hidden; background: #171a21; }
         .demo-desk iframe { position: absolute; left: 0; top: 0; width: 1360px; height: 860px; border: 0; transform-origin: 0 0; }
@@ -123,9 +310,13 @@
 
         /* ── How it works ── */
         .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; position: relative; }
-        .flow::before { content: ""; position: absolute; left: 6%; right: 6%; top: 37px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--blue), var(--green), var(--text)); opacity: .35; }
-        .flow::after { content: ""; position: absolute; top: 33px; left: 6%; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 16px 4px rgba(102, 192, 244, .8); animation: pulse 5s cubic-bezier(.6, 0, .4, 1) infinite; }
-        @keyframes pulse { 0% { left: 6%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: calc(94% - 10px); opacity: 0; } }
+        .flow::before { content: ""; position: absolute; left: 6%; right: 6%; top: 37px; height: 2px; background: var(--line-soft); }
+        /* The fill follows the scroll (--p, set by site.js) and each step lights up when it reaches it. Without script: full, all lit */
+        .flow-fill { position: absolute; left: 6%; right: 6%; top: 37px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--blue), var(--green), var(--text)); box-shadow: 0 0 12px rgba(102, 192, 244, .5); transform-origin: 0 0; transform: scaleX(var(--p, 1)); }
+        .step .dot, .step h3, .step p { transition: opacity .5s, border-color .5s, box-shadow .5s; }
+        .js .step:not(.lit) .dot { opacity: .45; }
+        .js .step:not(.lit) h3, .js .step:not(.lit) p { opacity: .55; }
+        .step.lit .dot { border-color: rgba(102, 192, 244, .45); box-shadow: 0 0 24px -6px rgba(102, 192, 244, .45); }
         .step { position: relative; padding: 0 4px; display: flex; flex-direction: column; gap: 12px; }
         .step .dot { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); position: relative; z-index: 1; }
         .step .dot svg { width: 30px; height: 30px; }
@@ -133,8 +324,8 @@
         .step p { margin: 0; color: var(--muted); font-size: 15.5px; }
         @media (max-width: 860px) {
             .flow { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-            .flow::before { left: 37px; right: auto; top: 20px; bottom: 20px; width: 2px; height: auto; background: linear-gradient(180deg, var(--gold), var(--blue), var(--green), var(--text)); }
-            .flow::after { display: none; }
+            .flow::before { left: 37px; right: auto; top: 20px; bottom: 20px; width: 2px; height: auto; }
+            .flow-fill { left: 37px; right: auto; top: 20px; bottom: 20px; width: 2px; height: auto; background: linear-gradient(180deg, var(--gold), var(--blue), var(--green), var(--text)); transform: scaleY(var(--p, 1)); }
             .step { display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; }
             .step .dot { grid-row: span 3; }
             .step h3 { margin-top: 4px; }
@@ -145,16 +336,24 @@
         .setup ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
         .setup li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 18px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line-soft); transition: border-color .3s, transform .3s; }
         .setup li:hover { border-color: var(--line); transform: translateX(4px); }
-        .setup li::before { content: counter(s, decimal-leading-zero); font: 700 15px var(--display); color: var(--blue); }
+        .setup li::before { content: counter(s, decimal-leading-zero); font: 700 15px var(--display); color: var(--blue); transition: color .4s; }
+        .setup li { transition: border-color .4s, transform .3s, background .4s; }
+        .setup li.done { border-color: rgba(108, 200, 94, .35); }
+        .setup li.done::before { content: "✓"; color: var(--green-hi); font-size: 18px; }
         .setup li b { color: var(--white); font-weight: 600; display: block; }
         .setup li span { color: var(--muted); font-size: 14.5px; }
         .setup li em { font-style: normal; font: 600 12px var(--mono); color: var(--dim); }
+        /* The heading stays beside the list while it scrolls, only when they sit side by side */
+        .setup-head { margin: 0 !important; }
+        @media (min-width: 861px) { .setup-head { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 110px); } }
         @media (max-width: 860px) { .setup { grid-template-columns: minmax(0, 1fr); } }
 
         /* ── Final CTA ── */
-        .final { text-align: center; border-radius: 24px; padding: clamp(48px, 7vw, 88px) 24px; position: relative; overflow: hidden; isolation: isolate; }
-        .final::before { content: ""; position: absolute; inset: -40%; z-index: -1; background: url(assets/art-fallback.webp) 0 0 / 520px auto; transform: rotate(-12deg); opacity: .08; }
-        .final::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(600px 300px at 50% 0%, rgba(102, 192, 244, .25), transparent), radial-gradient(500px 260px at 50% 100%, rgba(229, 177, 67, .14), transparent); }
+        /* No box: the last screen sits on the page itself, a glow and a patch of the mosaic fading out in every direction */
+        .final { text-align: center; padding-block: clamp(56px, 9vw, 120px); position: relative; isolation: isolate; overflow: clip; }
+        .final::before { content: ""; position: absolute; inset: 0; z-index: -1; background: url(assets/art-fallback.webp) 0 0 / 520px auto; transform: rotate(-12deg); opacity: .07;
+            -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 95%); mask-image: radial-gradient(closest-side, #000 20%, transparent 95%); }
+        .final::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(closest-side, rgba(102, 192, 244, .18), transparent 80%), radial-gradient(40% 35% at 50% 85%, rgba(229, 177, 67, .1), transparent); }
         .final img.crystal { width: 76px; height: 76px; margin: 0 auto 22px; }
         .final .cta { justify-content: center; margin-top: 30px; }
     </style>
@@ -219,25 +418,33 @@
         <div class="wrap">
             <div class="section-head">
                 <span class="eyebrow reveal">Features</span>
-                <h2 class="reveal">Everything you played, <span class="grad">in one place</span></h2>
+                <h2 class="reveal">Everything you played, <span class="soft">in one place</span></h2>
                 <p class="lede reveal">Built for your phone first, and roomy on a big screen. Every page reads your own data, refreshed every hour.</p>
             </div>
+            <div class="tabs ftabs reveal" role="tablist" aria-label="Features">
+                <button type="button" role="tab" data-ftab="overview" aria-pressed="true" aria-selected="true">Overview</button>
+                <button type="button" role="tab" data-ftab="analytics" aria-pressed="false" aria-selected="false">Analytics</button>
+                <button type="button" role="tab" data-ftab="activity" aria-pressed="false" aria-selected="false">Activity</button>
+                <button type="button" role="tab" data-ftab="completions" aria-pressed="false" aria-selected="false">Completions</button>
+                <button type="button" role="tab" data-ftab="series" aria-pressed="false" aria-selected="false">Series</button>
+            </div>
+            <div class="fpanel" id="ft-overview" role="tabpanel">
             <div class="bento">
-                <article class="card b-hub reveal">
-                    <div class="txt"><span class="tag" style="color:var(--blue)">Hub</span><h3>Every platform on one screen</h3><p>The games in rotation, your series, the latest unlocks and each platform's headline numbers.</p></div>
-                    <div class="shot"><img src="assets/shots/d-hub.webp" alt="The hub on desktop" loading="lazy"></div>
+                <article class="card b-wide reveal">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Profiles</span><h3>A full profile per platform</h3><p>Every game with its achievements and rarity, and tabs for progress, recent activity and series.</p></div>
+                    <div class="shot"><img src="assets/shots/d-ra.webp" alt="RetroAchievements profile on desktop" loading="lazy"></div>
                 </article>
                 <article class="card b-prof reveal" style="--d:.05s">
-                    <div class="txt"><span class="tag" style="color:var(--gold)">Profiles</span><h3>A full profile per platform</h3><p>Every game, achievement and rarity, with tabs for progress and series.</p></div>
-                    <div class="shot"><img src="assets/shots/ra.webp" alt="RetroAchievements profile" loading="lazy"></div>
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Platforms</span><h3>Same look on Steam and Xbox</h3><p>Each platform keeps its own numbers, like Steam rarity and Xbox gamerscore, in one familiar layout.</p></div>
+                    <div class="shot"><img src="assets/shots/steam.webp" alt="Steam profile on a phone" loading="lazy"></div>
                 </article>
                 <article class="card b-act reveal">
                     <div class="txt"><span class="tag" style="color:var(--blue)">Activity</span><h3>What you played, and when</h3><p>Sessions from your playtime, unlocks day by day, the games in rotation.</p></div>
                     <div class="shot"><img src="assets/shots/playing.webp" alt="Games in rotation" loading="lazy"></div>
                 </article>
                 <article class="card b-ana reveal" style="--d:.05s">
-                    <div class="txt"><span class="tag" style="color:var(--green-hi)">Analytics</span><h3>Months of play in charts</h3><p>Any period against the one before: hours, peak times, top games.</p></div>
-                    <div class="shot"><img src="assets/shots/analytics.webp" alt="Analytics" loading="lazy"></div>
+                    <div class="txt"><span class="tag" style="color:var(--green-hi)">Games</span><h3>Every game opens up</h3><p>Tap any game for its achievements, rarity and progress in one sheet.</p></div>
+                    <div class="shot"><img src="assets/shots/sheet.webp" alt="A game's achievement sheet" loading="lazy"></div>
                 </article>
                 <article class="card b-ser reveal" style="--d:.1s">
                     <div class="txt"><span class="tag" style="color:var(--gold)">Series</span><h3>Franchises across platforms</h3><p>Group games into series and sub-series, with progress for each.</p></div>
@@ -251,9 +458,82 @@
                     <div class="txt"><span class="tag" style="color:var(--blue)">Admin panel</span><h3>Curate it from your computer</h3><p>Edit series, pick art, set win conditions, start data runs and publish. Never deployed.</p></div>
                     <div class="shot"><img src="assets/shots/admin-config.webp" alt="Admin panel" loading="lazy"></div>
                 </article>
-                <article class="card b-mini reveal"><span class="big grad">Hourly</span><p>Fresh data every hour from GitHub Actions, or every 30 minutes with a free external cron.</p></article>
-                <article class="card b-mini reveal" style="--d:.05s"><span class="big grad">$0</span><p>Hosted on GitHub Pages. No server, no database, no account anywhere else.</p></article>
-                <article class="card b-mini reveal" style="--d:.1s"><span class="big grad">App</span><p>Install it on your phone from the browser; it opens full screen and works offline.</p></article>
+                <article class="card b-mini b-hourly reveal">
+                    <div class="txt2"><span class="tag" style="color:var(--blue)">Always current</span><span class="big">Hourly</span><p>Fresh data every hour from GitHub Actions, or every 30 minutes with a free external cron.</p></div>
+                    <div class="heat" aria-label="The author’s unlocks per day over the last 13 weeks">
+                        <div class="heat-grid" id="heat"></div>
+                        <div class="heat-meta"><span id="heat-n"></span><span>Last 13 weeks</span></div>
+                    </div>
+                </article>
+                <article class="card b-mini reveal" style="--d:.05s"><span class="big">$0</span><p>Hosted on GitHub Pages. No server, no database, no account anywhere else.</p></article>
+                <article class="card b-mini reveal" style="--d:.1s"><span class="big">App</span><p>Install it on your phone from the browser; it opens full screen and works offline.</p></article>
+            </div>
+            </div>
+
+            <div class="fpanel" id="ft-analytics" role="tabpanel" hidden>
+                <div class="tab-intro">
+                    <h3>Know how you play. <span class="soft">Not only what you unlocked.</span></h3>
+                    <p>Every play session from RetroAchievements and Steam is logged, so Savepoint can show when you play, which game took your time, your rarest unlocks and the games you came back to.</p>
+                    <span class="pill live"><i></i>Live: the author's last 3 months</span>
+                </div>
+                <div class="ana play" id="ana">
+                    <div class="ana-recap" id="ana-recap"></div>
+                    <div class="ana-rhythm">
+                        <svg class="ana-clock" id="ana-clock" viewBox="0 0 120 120" role="img" aria-label="Play by hour of the day"></svg>
+                        <dl class="ana-facts" id="ana-facts"></dl>
+                    </div>
+                    <div class="ana-top" id="ana-top"></div>
+                    <div class="ana-card" id="ana-rare"></div>
+                    <div class="ana-card" id="ana-story"></div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-activity" role="tabpanel" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--blue)">Activity</span>
+                        <h3>Every session, on the day you played it</h3>
+                        <p>Lifetime playtime from RetroAchievements and Steam turns into real sessions: when you started, how long you stayed, and what you unlocked on the way.</p>
+                        <a class="show-demo" href="#demo" data-demo="activity/">Open Activity in the live demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                    <div class="show-stage">
+                        <img class="show-shot" src="assets/shots/d-activity.webp" alt="The Activity page on desktop" loading="lazy">
+                        <div class="feed show-card play" id="act-card" aria-label="Latest play sessions">
+                            <div class="feed-head">Recent sessions<span class="st" aria-live="polite"><i></i><span id="act-st">Synced · just now</span></span></div>
+                            <ul class="sess" id="act-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-completions" role="tabpanel" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--gold)">Completions</span>
+                        <h3>Every finished game, on one shelf</h3>
+                        <p>Mastered, perfect and beaten games from every platform, newest first, each with the achievement that finished it.</p>
+                        <a class="show-demo" href="#demo" data-demo="completions/">Open Completions in the live demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                    <div class="show-stage">
+                        <img class="show-shot" src="assets/shots/d-completions.webp" alt="The Completions page on desktop" loading="lazy">
+                        <div class="feed show-card play" id="cmp-card" aria-label="Latest completions"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-series" role="tabpanel" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--gold)">Series</span>
+                        <h3>Your franchises, across platforms</h3>
+                        <p>Group games from every platform into a series and watch it fill in: finished in gold, beaten in silver, started in blue.</p>
+                        <a class="show-demo" href="#demo" data-demo="series/">Open Series in the live demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+                    </div>
+                    <div class="show-stage">
+                        <img class="show-shot" src="assets/shots/d-series.webp" alt="The Series page on desktop" loading="lazy">
+                        <div class="feed show-card play" id="ser-card" aria-label="A series"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -263,9 +543,10 @@
         <div class="wrap">
             <div class="section-head center">
                 <span class="eyebrow reveal">Live demo</span>
-                <h2 class="reveal">Not a mock-up. <span class="grad">A real hub.</span></h2>
+                <h2 class="reveal">Not a mock-up. <span class="soft">A real hub.</span></h2>
                 <p class="lede reveal">This is the author's own Savepoint, running live. Tap around: open a game, switch tabs, scroll the activity.</p>
             </div>
+            <div class="demo-body is-phone" id="demo-body">
             <div class="demo-bar reveal">
                 <div class="tabs" role="group" aria-label="Page">
                     <button type="button" data-page="" aria-pressed="true">Hub</button>
@@ -291,6 +572,7 @@
                 <a class="demo-open" id="demo-open" href="https://yozuryu.github.io/gaming-hub/" target="_blank" rel="noopener">Open it in its own tab
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
             </div>
+            </div>
         </div>
     </section>
 
@@ -299,10 +581,11 @@
         <div class="wrap">
             <div class="section-head">
                 <span class="eyebrow reveal">How it works</span>
-                <h2 class="reveal">No server. <span class="grad">Just your GitHub repository.</span></h2>
+                <h2 class="reveal">No server. <span class="soft">Just your GitHub repository.</span></h2>
                 <p class="lede reveal">Everything runs on free GitHub features. Your keys stay in encrypted secrets; the site is plain files that read your data.</p>
             </div>
-            <div class="flow">
+            <div class="flow" id="flow">
+                <div class="flow-fill" aria-hidden="true"></div>
                 <div class="step reveal">
                     <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#e5b143" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2"/></svg></div>
                     <h3>Your API keys</h3><p>RetroAchievements, Steam and OpenXBL keys go into your repository's Actions secrets.</p>
@@ -326,13 +609,13 @@
     <!-- Setup -->
     <section class="section" id="setup">
         <div class="wrap setup">
-            <div class="section-head" style="margin:0;position:sticky;top:110px">
+            <div class="section-head setup-head">
                 <span class="eyebrow reveal">Setup</span>
-                <h2 class="reveal">Live in about <span class="grad">fifteen minutes</span></h2>
+                <h2 class="reveal">Live in about <span class="soft">fifteen minutes</span></h2>
                 <p class="lede reveal">All in the browser, nothing to install. The docs walk you through each step and fill in your own names as you go.</p>
                 <div class="cta reveal"><a class="btn btn-primary" href="docs/">Open the setup guide</a></div>
             </div>
-            <ol>
+            <ol id="setup-list">
                 <li class="reveal"><div><b>Create your repository</b><span>Use this template, name it <code>savepoint</code></span></div><em>1 min</em></li>
                 <li class="reveal" style="--d:.04s"><div><b>Turn on GitHub Pages</b><span>Source: GitHub Actions</span></div><em>1 min</em></li>
                 <li class="reveal" style="--d:.08s"><div><b>Get your API keys</b><span>RetroAchievements, Steam, OpenXBL: only the ones you use</span></div><em>5 min</em></li>
@@ -346,7 +629,7 @@
     <!-- Final -->
     <section class="section" style="padding-top:0">
         <div class="wrap">
-            <div class="final edge reveal">
+            <div class="final reveal">
                 <img class="crystal" src="assets/favicon.svg" alt="">
                 <h2>Your progress deserves<br><span class="grad">a save point.</span></h2>
                 <p class="lede" style="margin:18px auto 0">Free, open source and yours: the code, the data and the address.</p>

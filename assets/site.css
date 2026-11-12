@@ -78,6 +78,7 @@ code, kbd, pre { font-family: var(--mono); }
 /* ── Type ── */
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1 var(--display); letter-spacing: .22em; text-transform: uppercase; color: var(--blue); }
 .eyebrow::before { content: ""; width: 26px; height: 2px; background: linear-gradient(90deg, transparent, var(--blue)); }
+.soft { color: var(--dim); }
 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 h1, h2, h3 { font-family: var(--display); color: var(--white); text-wrap: balance; margin: 0; letter-spacing: .005em; }
 h2 { font-size: clamp(32px, 4.6vw, 54px); line-height: 1.05; font-weight: 700; }
@@ -132,6 +133,7 @@ code { font-size: .9em; }
 .footer a { color: var(--muted); }
 .footer a:hover { color: var(--white); }
 .footer .fine { flex-basis: 100%; font-size: 13px; }
+@media (max-width: 600px) { .footer .brand { flex-basis: 100%; } .footer .wrap { gap: 14px 24px; } }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
