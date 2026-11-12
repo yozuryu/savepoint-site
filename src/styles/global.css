@@ -111,7 +111,6 @@ h3 { font-size: 21px; line-height: 1.2; font-weight: 700; }
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18, 26, 36, .7); font-size: 14px; font-weight: 500; color: var(--text); }
 .chip img { width: 18px; height: 18px; border-radius: 3px; }
 .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; border: 1px solid var(--line); background: rgba(18, 26, 36, .7); font-size: 13px; color: var(--muted); }
-.pill b { padding: 3px 10px; border-radius: 999px; background: rgba(82, 176, 67, .16); color: var(--green-hi); font-weight: 600; }
 
 /* ── Small shared motions: content rising in, a check popping, a fade ── */
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
