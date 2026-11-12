@@ -1,0 +1,22 @@
+---
+layout: ../../layouts/Docs.astro
+slug: scheduling
+title: "How often Savepoint updates: data runs and their modes"
+description: "Savepoint fetches your achievements every hour with GitHub Actions and refreshes rarity and ranks daily. What each run mode does and when to start one by hand."
+heading: Scheduling
+lede: "Your data updates itself through GitHub Actions. Four kinds of run, two of them on a schedule."
+---
+
+<div class="tbl"><table>
+<thead><tr><th>When</th><th>Mode</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Every hour</td><td><code>incremental</code></td><td>Recent activity; writes only when you played or unlocked something</td></tr>
+<tr><td>Daily, 00:05 UTC</td><td><code>midnight</code></td><td>Rarity, ranks and other slow-changing data</td></tr>
+<tr><td>By hand</td><td><code>full-refresh</code></td><td>Every game on every platform: the first run, or a repair</td></tr>
+<tr><td>By hand</td><td><code>watchlist-only</code></td><td>Only the RetroAchievements want-to-play list</td></tr>
+</tbody>
+</table></div>
+
+To start one by hand, open **Actions → Fetch Data → Run workflow** in your repository and pick the mode.
+
+<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="#66c0f4" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><p>GitHub starts scheduled runs when it has room, often 10 to 60 minutes late. For runs on time, <a href="../cron-job-org/">add an external cron</a>.</p></div>

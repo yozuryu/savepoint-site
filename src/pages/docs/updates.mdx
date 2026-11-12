@@ -1,0 +1,12 @@
+---
+layout: ../../layouts/Docs.astro
+slug: updates
+title: "Get Savepoint updates into your own copy"
+description: "Pull improvements from the Savepoint template into your repository with git, keeping your own config and series."
+heading: Getting updates
+lede: "Your copy is yours, so updates from the template arrive when you merge them."
+---
+
+<div class="codebox"><pre><span class="k">git remote add</span> template https://github.com/yozuryu/savepoint.git{'\n'}<span class="k">git fetch</span> template{'\n'}<span class="k">git merge</span> template/main --allow-unrelated-histories   <span class="c"># first time; later just git merge template/main</span></pre></div>
+
+<p class="muted">When Git reports conflicts in your config or series files, keep your own version.</p>

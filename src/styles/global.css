@@ -46,7 +46,7 @@ code, kbd, pre { font-family: var(--mono); }
 .sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .sky::before { content: ""; position: absolute; inset: 0 0 auto; height: 1200px; background-image: linear-gradient(rgba(102, 192, 244, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(102, 192, 244, .045) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%); }
 /* The library mosaic, tilted and faint like the posters */
-.sky::after { content: ""; position: absolute; inset: -400px; background: url(art-fallback.webp) 0 0 / 640px auto; transform: rotate(-12deg); opacity: .05; }
+.sky::after { content: ""; position: absolute; inset: -400px; background: url(/assets/art-fallback.webp) 0 0 / 640px auto; transform: rotate(-12deg); opacity: .05; }
 .glow { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .7; }
 .glow.a { width: 620px; height: 460px; left: -120px; top: -160px; background: rgba(102, 192, 244, .45); }
 .glow.b { width: 520px; height: 420px; right: -140px; top: 120px; background: rgba(229, 177, 67, .28); }

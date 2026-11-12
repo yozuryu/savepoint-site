@@ -1,0 +1,25 @@
+---
+layout: ../../layouts/Docs.astro
+slug: troubleshooting
+title: "Savepoint troubleshooting: 404, missing data, Steam and Xbox errors"
+description: "Fixes for common Savepoint problems: GitHub Pages 404, a profile with no data, skipped platforms, empty Steam libraries, Xbox 429 errors and a site that stopped updating."
+heading: Troubleshooting
+lede: "The usual problems and their fixes."
+faq:
+  - q: The site shows GitHub's 404 page
+    a: Set <b>Settings → Pages → Source</b> to <b>GitHub Actions</b>, then run <b>Deploy site</b> from the Actions tab.
+  - q: A profile says "No data yet"
+    a: Run <b>Fetch Data</b> with <code>full-refresh</code>, and check that platform's secrets.
+  - q: The run says a platform was skipped
+    a: Its secrets are missing or misspelled. Names are case-sensitive.
+  - q: Steam shows no games
+    a: Your Steam <b>Game details</b> privacy setting must be <b>Public</b>.
+  - q: Xbox fails with 429
+    a: That's OpenXBL's rate limit. A later run succeeds.
+  - q: The site stopped updating
+    a: GitHub turns off scheduled workflows after 60 days without activity in the repository. Enable <b>Fetch Data</b> again in the Actions tab, or use cron-job.org, which keeps it running.
+  - q: My phone shows an old version
+    a: Tap the circular arrow in the hub header (<b>Refresh app</b>).
+---
+
+{frontmatter.faq.map(x => <details><summary>{x.q}</summary><div><p set:html={x.a} /></div></details>)}

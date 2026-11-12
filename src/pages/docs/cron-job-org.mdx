@@ -1,0 +1,22 @@
+---
+layout: ../../layouts/Docs.astro
+slug: cron-job-org
+title: "On-time Savepoint updates with cron-job.org"
+description: "GitHub runs scheduled workflows late. Use the free cron-job.org to start Savepoint's data fetch on time through the GitHub API, every 30 minutes."
+heading: On-time runs with cron-job.org
+lede: "cron-job.org is free and can start the workflow through GitHub's API, on time, every 30 minutes."
+---
+import CronHelper from '../../components/docs/CronHelper';
+import Fill from '../../components/docs/Fill';
+
+## 1. Create a GitHub token
+
+Make a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a> with **Only select repositories** → <code><Fill client:idle k="repo" /></code>, and **Permissions → Actions: Read and write**.
+
+## 2. Create the job
+
+On <a href="https://cron-job.org" target="_blank" rel="noopener">cron-job.org</a>, create a job with these settings. The URL fills in from the name you gave on the <a href="../">setup page</a>.
+
+<CronHelper client:visible />
+
+<p class="muted">Make one job of each kind. A working call answers <code>204 No Content</code>. You can keep the built-in schedule as a fallback or remove its <code>cron:</code> lines from <code>fetch-data.yml</code>.</p>

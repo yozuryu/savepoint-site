@@ -1,0 +1,21 @@
+---
+layout: ../../layouts/Docs.astro
+slug: platforms
+title: "Turn RetroAchievements, Steam and Xbox on or off in Savepoint"
+description: "Use only the platforms you play on: skip their secrets, hide them on the site, pause syncing, or run one platform by hand."
+heading: Platforms on and off
+lede: "Two separate switches: whether a platform syncs, and whether it shows on your site."
+---
+
+<div class="tbl"><table>
+<thead><tr><th>You want to…</th><th>Do this</th></tr></thead>
+<tbody>
+<tr><td>Not use a platform at all</td><td>Skip its secrets, and set it to <code>"visible": false</code> in <code>config.json</code></td></tr>
+<tr><td>Hide a platform on the site</td><td><code>"visible": false</code> in <code>config.json</code>, or <b>Admin → Site Config</b></td></tr>
+<tr><td>Stop syncing but keep showing it</td><td>In <code>.github/workflows/fetch-data.yml</code> set <code>RA_ENABLED</code>, <code>STEAM_ENABLED</code> or <code>XBOX_ENABLED</code> to <code>'false'</code></td></tr>
+<tr><td>Sync a paused platform once</td><td><b>Run workflow</b> with <b>platforms</b> set to that platform</td></tr>
+<tr><td>Hide a hub section</td><td><code>"visible": false</code> under <code>playing</code>, <code>series</code>, <code>activity</code>, <code>completions</code> or <code>analytics</code></td></tr>
+</tbody>
+</table></div>
+
+A platform without secrets is skipped by every run, so you can add it later: add its secrets, set it visible, and run **Fetch Data** with `full-refresh` once.

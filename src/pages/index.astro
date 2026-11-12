@@ -1,0 +1,308 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import HeroFeed from '../components/HeroFeed';
+import Heatmap from '../components/Heatmap';
+import FeatureTabs from '../components/FeatureTabs';
+import AnalyticsShow from '../components/AnalyticsShow';
+import ActivityShow from '../components/ActivityShow';
+import CompletionsShow from '../components/CompletionsShow';
+import SeriesShow from '../components/SeriesShow';
+import LiveDemo from '../components/LiveDemo';
+import SavePoint from '../components/SavePoint';
+import { TEMPLATE } from '../lib/hub';
+import '../styles/home.css';
+
+import dHub from '../assets/shots/d-hub.webp';
+import hub from '../assets/shots/hub.webp';
+import dRa from '../assets/shots/d-ra.webp';
+import steam from '../assets/shots/steam.webp';
+import playing from '../assets/shots/playing.webp';
+import sheet from '../assets/shots/sheet.webp';
+import series from '../assets/shots/series.webp';
+import dCompletions from '../assets/shots/d-completions.webp';
+import adminConfig from '../assets/shots/admin-config.webp';
+import dActivity from '../assets/shots/d-activity.webp';
+import dSeries from '../assets/shots/d-series.webp';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const icon = (f: string) => base + 'assets/' + f;
+const arrow = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+const description = 'Savepoint is a free, self-hosted achievement tracker for RetroAchievements, Steam and Xbox: your achievements, playtime and completions on one site you own, updated every hour on GitHub Pages.';
+const jsonLd = [{
+    '@type': 'SoftwareApplication',
+    name: 'Savepoint',
+    description,
+    applicationCategory: 'UtilitiesApplication',
+    applicationSubCategory: 'Achievement tracker',
+    operatingSystem: 'Web',
+    url: new URL(base, Astro.site).href,
+    image: new URL(base + 'assets/og.jpg', Astro.site).href,
+    screenshot: new URL(dHub.src, Astro.site).href,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    license: 'https://opensource.org/licenses/MIT',
+    isAccessibleForFree: true,
+    sameAs: [TEMPLATE],
+    featureList: ['RetroAchievements, Steam and Xbox in one place', 'Play sessions and analytics', 'Completions timeline', 'Series across platforms', 'Installs as a phone app', 'Free hosting on GitHub Pages'],
+}];
+const sizesWide = '(max-width: 900px) 100vw, 700px';
+const sizesCell = '(max-width: 600px) 0px, (max-width: 960px) 50vw, 400px';
+---
+<Base title="Savepoint: self-hosted achievement tracker for RetroAchievements, Steam and Xbox" {description} {jsonLd}>
+<main>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-copy">
+                <span class="pill reveal"><b>Free</b>Open source, MIT licensed</span>
+                <h1 class="reveal" style="--d:.05s">Every save.<br>Every platform.<br><span class="grad">Your own hub.</span></h1>
+                <p class="lede reveal" style="--d:.1s">Savepoint gathers your RetroAchievements, Steam and Xbox achievements, playtime and completions into one site that updates itself every hour, hosted free on your own GitHub.</p>
+                <div class="cta reveal" style="--d:.15s">
+                    <a class="btn btn-primary" href={TEMPLATE + '/generate'}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                        Use the template
+                    </a>
+                    <a class="btn btn-ghost" href="#demo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+                        Try the live demo
+                    </a>
+                </div>
+                <div class="chips reveal" style="--d:.2s">
+                    <span class="chip"><img src={icon('icon-ra.png')} alt="" width="18" height="18">RetroAchievements</span>
+                    <span class="chip"><img src={icon('icon-steam.png')} alt="" width="18" height="18">Steam</span>
+                    <span class="chip"><img src={icon('icon-xbox.png')} alt="" width="18" height="18">Xbox</span>
+                </div>
+            </div>
+            <div class="stage reveal" style="--d:.15s" aria-label="The Savepoint hub on desktop and phone">
+                <div class="halo"></div>
+                <Image class="shot-d" src={dHub} alt="Savepoint hub on desktop: games in rotation, series and platform totals" widths={[800, 1200, 1600]} sizes="(max-width: 900px) 90vw, 640px" loading="eager" fetchpriority="high" />
+                <HeroFeed client:visible />
+                <div class="phone"><Image src={hub} alt="Savepoint hub on a phone" widths={[300, 600]} sizes="(max-width: 900px) 30vw, 200px" loading="eager" /></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow reveal">Features</span>
+                <h2 class="reveal">Everything you played, <span class="soft">in one place</span></h2>
+                <p class="lede reveal">Built for your phone first, and roomy on a big screen. Every page reads your own data, refreshed every hour.</p>
+            </div>
+            <FeatureTabs client:load />
+            <div class="fpanel" id="ft-overview" role="tabpanel" aria-label="Overview">
+            <div class="bento">
+                <article class="card b-wide reveal">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Profiles</span><h3>A full profile per platform</h3><p>Every game with its achievements and rarity, and tabs for progress, recent activity and series.</p></div>
+                    <div class="shot"><Image src={dRa} alt="RetroAchievements profile on desktop" widths={[700, 1100]} sizes={sizesWide} /></div>
+                </article>
+                <article class="card b-prof reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Platforms</span><h3>Same look on Steam and Xbox</h3><p>Each platform keeps its own numbers, like Steam rarity and Xbox gamerscore, in one familiar layout.</p></div>
+                    <div class="shot"><Image src={steam} alt="Steam profile on a phone" widths={[400, 600]} sizes={sizesCell} /></div>
+                </article>
+                <article class="card b-act reveal">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Activity</span><h3>What you played, and when</h3><p>Sessions from your playtime, unlocks day by day, the games in rotation.</p></div>
+                    <div class="shot"><Image src={playing} alt="Games in rotation on the Activity page" widths={[400, 600]} sizes={sizesCell} /></div>
+                </article>
+                <article class="card b-ana reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--green-hi)">Games</span><h3>Every game opens up</h3><p>Tap any game for its achievements, rarity and progress in one sheet.</p></div>
+                    <div class="shot"><Image src={sheet} alt="A game's achievement sheet" widths={[400, 600]} sizes={sizesCell} /></div>
+                </article>
+                <article class="card b-ser reveal" style="--d:.1s">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Series</span><h3>Franchises across platforms</h3><p>Group games into series and sub-series, with progress for each.</p></div>
+                    <div class="shot"><Image src={series} alt="Series page" widths={[400, 600]} sizes={sizesCell} /></div>
+                </article>
+                <article class="card b-cmp reveal">
+                    <div class="txt"><span class="tag" style="color:var(--gold)">Completions</span><h3>Mastered, perfect and beaten</h3><p>Every finished game from every platform on one timeline, with its rarest achievement.</p></div>
+                    <div class="shot"><Image src={dCompletions} alt="Completions timeline" widths={[600, 900]} sizes={sizesWide} /></div>
+                </article>
+                <article class="card b-adm reveal" style="--d:.05s">
+                    <div class="txt"><span class="tag" style="color:var(--blue)">Admin panel</span><h3>Curate it from your computer</h3><p>Edit series, pick art, set win conditions, start data runs and publish. Never deployed.</p></div>
+                    <div class="shot"><Image src={adminConfig} alt="Admin panel: Site Config page" widths={[600, 900]} sizes={sizesWide} /></div>
+                </article>
+                <article class="card b-mini b-hourly reveal">
+                    <div class="txt2"><span class="tag" style="color:var(--blue)">Always current</span><span class="big">Hourly</span><p>Fresh data every hour from GitHub Actions, or every 30 minutes with a free external cron.</p></div>
+                    <Heatmap client:visible />
+                </article>
+                <article class="card b-mini reveal" style="--d:.05s"><span class="big">$0</span><p>Hosted on GitHub Pages. No server, no database, no account anywhere else.</p></article>
+                <article class="card b-mini reveal" style="--d:.1s"><span class="big">App</span><p>Install it on your phone from the browser; it opens full screen and works offline.</p></article>
+            </div>
+            </div>
+
+            <div class="fpanel" id="ft-analytics" role="tabpanel" aria-label="Analytics" hidden>
+                <div class="tab-intro">
+                    <h3>Know how you play. <span class="soft">Not only what you unlocked.</span></h3>
+                    <p>Every play session from RetroAchievements and Steam is logged, so Savepoint can show when you play, which game took your time, your rarest unlocks and the games you came back to.</p>
+                    <span class="pill live"><i></i>Live: the author's last 3 months</span>
+                </div>
+                <AnalyticsShow client:visible />
+            </div>
+
+            <div class="fpanel" id="ft-activity" role="tabpanel" aria-label="Activity" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--blue)">Activity</span>
+                        <h3>Every session, on the day you played it</h3>
+                        <p>Lifetime playtime from RetroAchievements and Steam turns into real sessions: when you started, how long you stayed, and what you unlocked on the way.</p>
+                        <a class="show-demo" href="#demo" data-demo="activity/">Open Activity in the live demo <Fragment set:html={arrow} /></a>
+                    </div>
+                    <div class="show-stage">
+                        <Image class="show-shot" src={dActivity} alt="The Activity page on desktop" widths={[700, 1100]} sizes={sizesWide} />
+                        <ActivityShow client:visible />
+                    </div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-completions" role="tabpanel" aria-label="Completions" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--gold)">Completions</span>
+                        <h3>Every finished game, on one shelf</h3>
+                        <p>Mastered, perfect and beaten games from every platform, newest first, each with the achievement that finished it.</p>
+                        <a class="show-demo" href="#demo" data-demo="completions/">Open Completions in the live demo <Fragment set:html={arrow} /></a>
+                    </div>
+                    <div class="show-stage">
+                        <Image class="show-shot" src={dCompletions} alt="The Completions page on desktop" widths={[700, 1100]} sizes={sizesWide} />
+                        <CompletionsShow client:visible />
+                    </div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-series" role="tabpanel" aria-label="Series" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--gold)">Series</span>
+                        <h3>Your franchises, across platforms</h3>
+                        <p>Group games from every platform into a series and watch it fill in: finished in gold, beaten in silver, started in blue.</p>
+                        <a class="show-demo" href="#demo" data-demo="series/">Open Series in the live demo <Fragment set:html={arrow} /></a>
+                    </div>
+                    <div class="show-stage">
+                        <Image class="show-shot" src={dSeries} alt="The Series page on desktop" widths={[700, 1100]} sizes={sizesWide} />
+                        <SeriesShow client:visible />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live demo -->
+    <section class="section" id="demo">
+        <div class="wrap">
+            <div class="section-head center">
+                <span class="eyebrow reveal">Live demo</span>
+                <h2 class="reveal">Not a mock-up. <span class="soft">A real hub.</span></h2>
+                <p class="lede reveal">This is the author's own Savepoint, running live. Tap around: open a game, switch tabs, scroll the activity.</p>
+            </div>
+            <div class="reveal"><LiveDemo client:visible /></div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how">
+        <div class="wrap">
+            <div class="section-head">
+                <span class="eyebrow reveal">How it works</span>
+                <h2 class="reveal">No server. <span class="soft">Just your GitHub repository.</span></h2>
+                <p class="lede reveal">Everything runs on free GitHub features. Your keys stay in encrypted secrets; the site is plain files that read your data.</p>
+            </div>
+            <div class="flow" id="flow">
+                <div class="flow-fill" aria-hidden="true"></div>
+                <div class="step reveal">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#e5b143" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M14.5 8.5l2 2"/></svg></div>
+                    <h3>Your API keys</h3><p>RetroAchievements, Steam and OpenXBL keys go into your repository's Actions secrets.</p>
+                </div>
+                <div class="step reveal" style="--d:.08s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#66c0f4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                    <h3>GitHub Actions</h3><p>Every hour it fetches your profiles and commits only what changed to a <code>data</code> branch.</p>
+                </div>
+                <div class="step reveal" style="--d:.16s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#6cc85e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg></div>
+                    <h3>GitHub Pages</h3><p>When data changed, the site is deployed with it. Free for public repositories.</p>
+                </div>
+                <div class="step reveal" style="--d:.24s">
+                    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#c6d4df" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+                    <h3>Your phone</h3><p>Open it anywhere, or install it as an app. It refreshes itself in the background.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setup -->
+    <section class="section" id="setup">
+        <div class="wrap setup">
+            <div class="section-head setup-head">
+                <span class="eyebrow reveal">Setup</span>
+                <h2 class="reveal">Live in about <span class="soft">fifteen minutes</span></h2>
+                <p class="lede reveal">All in the browser, nothing to install. The docs walk you through each step and fill in your own names as you go.</p>
+                <div class="cta reveal"><a class="btn btn-primary" href={base + 'docs/'}>Open the setup guide</a></div>
+            </div>
+            <ol id="setup-list">
+                <li class="reveal"><div><b>Create your repository</b><span>Use this template, name it <code>savepoint</code></span></div><em>1 min</em></li>
+                <li class="reveal" style="--d:.04s"><div><b>Turn on GitHub Pages</b><span>Source: GitHub Actions</span></div><em>1 min</em></li>
+                <li class="reveal" style="--d:.08s"><div><b>Get your API keys</b><span>RetroAchievements, Steam, OpenXBL: only the ones you use</span></div><em>5 min</em></li>
+                <li class="reveal" style="--d:.12s"><div><b>Add them as secrets</b><span>Settings → Secrets and variables → Actions</span></div><em>2 min</em></li>
+                <li class="reveal" style="--d:.16s"><div><b>Make it yours</b><span>Name, motto, tags and platforms in <code>config.json</code></span></div><em>2 min</em></li>
+                <li class="reveal" style="--d:.2s"><div><b>Run the first fetch</b><span>Actions → Fetch Data → Run workflow</span></div><em>5 min</em></li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- Final -->
+    <section class="section" style="padding-top:0">
+        <div class="wrap">
+            <div class="reveal">
+                <SavePoint client:idle>
+                    <h2>Your progress deserves<br><span class="grad">a save point.</span></h2>
+                    <Fragment slot="after">
+                        <p class="lede" style="margin:18px auto 0">Free, open source and yours: the code, the data and the address.</p>
+                        <div class="cta">
+                            <a class="btn btn-primary" href={TEMPLATE + '/generate'}>Use the template</a>
+                            <a class="btn btn-ghost" href={base + 'docs/'}>Read the docs</a>
+                        </div>
+                    </Fragment>
+                </SavePoint>
+            </div>
+        </div>
+    </section>
+</main>
+</Base>
+
+<script>
+    // How it works and Setup follow the scroll: the line fills as you read down and each step lights up when
+    // the fill reaches it; setup steps tick off as they pass the middle of the screen
+    const flow = document.getElementById('flow'), setupList = document.getElementById('setup-list');
+    const steps = flow ? [...flow.querySelectorAll<HTMLElement>('.step')] : [];
+    const fill = flow?.querySelector('.flow-fill');
+    const items = setupList ? [...setupList.children] as HTMLElement[] : [];
+    let queued = false;
+    const update = () => {
+        queued = false;
+        const vh = innerHeight;
+        if (flow && fill) {
+            const r = flow.getBoundingClientRect();
+            // Phone (vertical line): fills while the steps pass the upper two thirds of the screen.
+            // Wide (one row): starts when the row is 85% down the screen, full at 40%
+            const vertical = r.height > r.width;
+            const p = vertical ? Math.min(1, Math.max(0, (vh * .7 - r.top) / r.height)) : Math.min(1, Math.max(0, (vh * .85 - r.top) / (vh * .45)));
+            flow.style.setProperty('--p', p.toFixed(3));
+            const f = fill.getBoundingClientRect();
+            steps.forEach(s => {
+                const d = s.querySelector('.dot')!.getBoundingClientRect();
+                const reached = vertical ? f.bottom >= d.top + d.height / 2 - 1 : f.right >= d.left + d.width / 2 - 1;
+                s.classList.toggle('lit', p > 0 && reached);
+            });
+        }
+        items.forEach(li => li.classList.toggle('done', li.getBoundingClientRect().top + li.offsetHeight / 2 < vh * .55));
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        flow?.style.setProperty('--p', '1');
+        steps.forEach(s => s.classList.add('lit'));
+    } else {
+        const req = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+        addEventListener('scroll', req, { passive: true });
+        addEventListener('resize', req);
+        update();
+    }
+</script>

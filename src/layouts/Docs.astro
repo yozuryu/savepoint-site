@@ -1,0 +1,48 @@
+---
+// Docs pages: the contents rail beside one readable column, a pager to the next guide, and breadcrumb
+// structured data. Used by the setup page (props) and the MDX guides (frontmatter).
+import Base from './Base.astro';
+import DocsRail from '../components/docs/DocsRail';
+import { GUIDES } from '../lib/guides';
+import '../styles/docs.css';
+
+interface Frontmatter { title: string; description: string; heading?: string; lede?: string; slug: string; faq?: { q: string; a: string }[] }
+const fm: Frontmatter = (Astro.props as { frontmatter?: Frontmatter }).frontmatter ?? (Astro.props as Frontmatter);
+const { title, description, heading, lede, slug, faq } = fm;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const abs = (p: string) => new URL(base + p, Astro.site).href;
+
+const i = GUIDES.findIndex(g => g.slug === slug);
+const prev = slug === '' ? null : i <= 0 ? { slug: '', label: 'Setup guide' } : GUIDES[i - 1];
+const next = slug === '' ? GUIDES[0] : GUIDES[i + 1] ?? null;
+const href = (s: string) => base + 'docs/' + (s ? s + '/' : '');
+
+const jsonLd: Record<string, unknown>[] = [{
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Savepoint', item: abs('') },
+        { '@type': 'ListItem', position: 2, name: 'Docs', item: abs('docs/') },
+        ...(slug ? [{ '@type': 'ListItem', position: 3, name: GUIDES[i].label, item: abs('docs/' + slug + '/') }] : []),
+    ],
+}];
+if (faq) jsonLd.push({ '@type': 'FAQPage', mainEntity: faq.map(x => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a.replace(/<[^>]+>/g, '') } })) });
+---
+<Base {title} {description} section="docs" type="article" {jsonLd}>
+<div class="wrap docs">
+    <DocsRail client:load base={base} guides={GUIDES} current={slug} />
+    <article class="doc">
+        {heading && (
+            <header>
+                <span class="eyebrow">{slug ? 'Guide' : 'Docs'}</span>
+                <h1 set:html={heading} />
+                {lede && <p class="lede">{lede}</p>}
+            </header>
+        )}
+        <slot />
+        <nav class="pager" aria-label="More docs">
+            {prev ? <a href={href(prev.slug)}><span>Previous</span>{prev.label}</a> : <span />}
+            {next && <a class="next" href={href(next.slug)}><span>Next</span>{next.label}</a>}
+        </nav>
+    </article>
+</div>
+</Base>

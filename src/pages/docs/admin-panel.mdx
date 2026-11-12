@@ -1,0 +1,40 @@
+---
+layout: ../../layouts/Docs.astro
+slug: admin-panel
+title: "The Savepoint admin panel: series, art, win conditions and data runs"
+description: "Run Savepoint's admin panel on your computer to edit series, pick game art from SteamGridDB, set win conditions, start data runs and publish your changes."
+heading: The admin panel
+lede: "Runs on your computer, never on the site. It edits files in your repository, so you work in a local copy."
+---
+import { Image } from 'astro:assets';
+import Fill from '../../components/docs/Fill';
+import adminConfig from '../../assets/shots/admin-config.webp';
+import adminSeries from '../../assets/shots/admin-hub-series.webp';
+
+## Start it
+
+You need <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js</a> 20 or newer.
+
+<div class="codebox"><pre><span class="k">git clone</span> <Fill client:idle k="clone" />{'\n'}<span class="k">cd</span> <Fill client:idle k="repo" />{'\n'}<span class="k">npm install</span>{'\n'}<span class="k">cp</span> .env.example .env      <span class="c"># then fill in your keys</span>{'\n'}<span class="k">npm run</span> data:pull         <span class="c"># your data branch into data/</span>{'\n'}<span class="k">npm run</span> admin             <span class="c"># http://localhost:3131</span></pre></div>
+
+<Image class="shot" src={adminConfig} alt="Admin panel: Site Config page" widths={[700, 1100]} sizes="(max-width: 900px) 100vw, 780px" />
+
+## What each page is for
+
+<div class="tbl"><table>
+<thead><tr><th>Page</th><th>For</th></tr></thead>
+<tbody>
+<tr><td>Site Config</td><td>Name, motto, tags, visible platforms and hub sections</td></tr>
+<tr><td>Credentials</td><td>Your <code>.env</code> keys</td></tr>
+<tr><td>Pipelines</td><td>Start real data runs (<code>GH_DISPATCH_TOKEN</code>), test runs on your computer, your cron-job.org jobs (<code>CRON_JOB_API_KEY</code>)</td></tr>
+<tr><td>Data Diff</td><td>What you changed, then Commit, Push or Publish</td></tr>
+<tr><td>Shared Series</td><td>Series that mix platforms, for the Series page</td></tr>
+<tr><td>Idle / Farm Games</td><td>Leave idlers and achievement farms out of Playing and Analytics</td></tr>
+<tr><td>RetroAchievements Art</td><td>Wide art and stand-in icons from SteamGridDB (<code>SGDB_API_KEY</code>)</td></tr>
+<tr><td>Win Conditions</td><td>The achievement that means "beaten" for a Steam or Xbox game</td></tr>
+</tbody>
+</table></div>
+
+<Image class="shot" src={adminSeries} alt="Admin panel: Shared Series editor" widths={[700, 1100]} sizes="(max-width: 900px) 100vw, 780px" />
+
+Saving writes files in `data/`; they reach your site when you commit and push them (**Data Diff → Publish**).

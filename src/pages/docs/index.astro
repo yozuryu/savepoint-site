@@ -1,0 +1,100 @@
+---
+import Docs from '../../layouts/Docs.astro';
+import AboutYou from '../../components/docs/AboutYou';
+import DoneButton from '../../components/docs/DoneButton';
+import Fill from '../../components/docs/Fill';
+import GitLink from '../../components/docs/GitLink';
+import KeyTabs from '../../components/docs/KeyTabs';
+import SecretsTable from '../../components/docs/SecretsTable';
+import ConfigBuilder from '../../components/docs/ConfigBuilder';
+import { TEMPLATE } from '../../lib/hub';
+
+const warn = '<svg viewBox="0 0 24 24" fill="none" stroke="#e5b143" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>';
+---
+<Docs
+    title="Set up Savepoint: your own achievement tracker in 15 minutes"
+    description="Step-by-step setup for Savepoint: create the repository, turn on GitHub Pages, add your RetroAchievements, Steam and Xbox API keys as secrets, and run the first data fetch."
+    heading='Set up your <span class="grad">Savepoint</span>'
+    lede="About fifteen minutes, all in the browser. Fill in your GitHub name below and every link and command on this page becomes yours."
+    slug=""
+>
+    <AboutYou client:load />
+
+    <section id="repo">
+        <h2><span class="num">01</span>Create your repository<DoneButton client:idle step="repo" /></h2>
+        <ol>
+            <li>Open the template and click <b>Use this template → Create a new repository</b>.</li>
+            <li>Name it <code><Fill client:idle k="repo" /></code>. The name becomes your address.</li>
+            <li>Keep it <b>Public</b>: GitHub Pages is free for public repositories, and so are Actions minutes.</li>
+        </ol>
+        <a class="btn btn-primary" href={TEMPLATE + '/generate'} target="_blank" rel="noopener">Use the template</a>
+        <div class="note warn"><Fragment set:html={warn} /><p>Use the template button, not <b>Fork</b>. GitHub turns off scheduled workflows in forks, so your data would never update on its own.</p></div>
+    </section>
+
+    <section id="pages">
+        <h2><span class="num">02</span>Turn on GitHub Pages<DoneButton client:idle step="pages" /></h2>
+        <p>In your repository, open <GitLink client:idle path="settings/pages"><b>Settings → Pages</b></GitLink> and set <b>Build and deployment → Source</b> to <b>GitHub Actions</b>.</p>
+        <p class="muted">That's the only setting. Don't choose a branch: the site is deployed by a workflow that adds your data to it.</p>
+    </section>
+
+    <section id="keys">
+        <h2><span class="num">03</span>Get your API keys<DoneButton client:idle step="keys" /></h2>
+        <p>Only for the platforms you picked above. Each takes a minute or two.</p>
+        <KeyTabs client:idle>
+            <ol slot="ra">
+                <li>Sign in at <a href="https://retroachievements.org" target="_blank" rel="noopener">retroachievements.org</a>.</li>
+                <li>Open <b>Settings</b>, find <b>Keys</b>, and copy your <b>Web API Key</b>.</li>
+                <li>You'll need that key and your username.</li>
+            </ol>
+            <ol slot="steam">
+                <li>Get a key at <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noopener">steamcommunity.com/dev/apikey</a>. Any domain name works, for example <code>localhost</code>.</li>
+                <li>Find your <b>SteamID64</b>, the 17-digit number starting with <code>7656119</code>. Paste your profile URL into <a href="https://steamid.io" target="_blank" rel="noopener">steamid.io</a> if you don't know it.</li>
+                <li>In Steam, <b>Edit Profile → Privacy Settings</b>: set <b>My profile</b> and <b>Game details</b> to <b>Public</b>. With private game details Steam returns nothing.</li>
+            </ol>
+            <ol slot="xbox">
+                <li>Xbox has no public API for this, so Savepoint uses <a href="https://xbl.io" target="_blank" rel="noopener">OpenXBL</a>, a free service. Sign in there with the Microsoft account you play on.</li>
+                <li>Open your profile and create an <b>API key</b>.</li>
+                <li>The free plan allows 150 requests an hour; a normal run uses two or three.</li>
+            </ol>
+        </KeyTabs>
+    </section>
+
+    <section id="secrets">
+        <h2><span class="num">04</span>Add the keys as secrets<DoneButton client:idle step="secrets" /></h2>
+        <p>Open <GitLink client:idle path="settings/secrets/actions/new"><b>Settings → Secrets and variables → Actions → New repository secret</b></GitLink> and add one secret per row. Names are case-sensitive.</p>
+        <SecretsTable client:idle />
+        <p class="muted">Secrets are encrypted and only the workflows can read them. They never reach the site or the data.</p>
+    </section>
+
+    <section id="config">
+        <h2><span class="num">05</span>Make it yours<DoneButton client:idle step="config" /></h2>
+        <p>Fill this in and copy the result into <GitLink client:idle path="edit/main/data/hub/config.json"><code>data/hub/config.json</code></GitLink> (the pencil icon edits it on GitHub). The card shows roughly how your hub header will look.</p>
+        <ConfigBuilder client:visible />
+        <p class="muted">The platforms come from your picks at the top of the page. Commit the file: that push deploys your site for the first time, still without data.</p>
+    </section>
+
+    <section id="first-run">
+        <h2><span class="num">06</span>Run the first data fetch<DoneButton client:idle step="first-run" /></h2>
+        <ol>
+            <li>Open <GitLink client:idle path="actions/workflows/fetch-data.yml"><b>Actions → Fetch Data</b></GitLink>. If GitHub asks, enable workflows first.</li>
+            <li>Click <b>Run workflow</b>, set <b>mode</b> to <code>full-refresh</code>, and start it.</li>
+            <li>Give it a few minutes; a big Steam library can take half an hour. A <b>deploy</b> job follows when data changed.</li>
+        </ol>
+        <p>Then open <GitLink client:idle site><Fill client:idle k="site" bold /></GitLink>. From now on it updates every hour by itself.</p>
+    </section>
+
+    <section id="phone">
+        <h2><span class="num">07</span>Put it on your phone<DoneButton client:idle step="phone" /></h2>
+        <p>Open your site on your phone, then <b>Share → Add to Home Screen</b> in Safari, or <b>⋮ → Install app</b> in Chrome. It opens full screen, and the circular arrow in the hub header loads a new version right away.</p>
+        <p>That's it. The guides cover <a href="platforms/">turning platforms on and off</a>, <a href="scheduling/">scheduling</a>, <a href="cron-job-org/">on-time runs with cron-job.org</a>, <a href="admin-panel/">the admin panel</a> and <a href="troubleshooting/">troubleshooting</a>.</p>
+    </section>
+</Docs>
+
+<script is:inline>
+    // The guides used to be sections of this page: send their old anchors to their own pages
+    (function () {
+        var moved = { platforms: 'platforms', scheduling: 'scheduling', cron: 'cron-job-org', admin: 'admin-panel', customise: 'customising', updates: 'updates', troubleshooting: 'troubleshooting' };
+        var to = moved[location.hash.slice(1)];
+        if (to) location.replace(to + '/');
+    })();
+</script>
