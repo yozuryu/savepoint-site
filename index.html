@@ -276,6 +276,13 @@
 
         /* ── Live demo ── */
         .demo-bar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .demo-body { transition: opacity .18s, transform .18s; }
+        .demo-body.out { opacity: 0; transform: translateY(6px); }
+        /* Pill switches: the highlight slides to the picked option instead of jumping */
+        .tabs:not(.ftabs), .seg { position: relative; }
+        .tab-ind { position: absolute; left: 0; top: 0; border-radius: 999px; background: var(--surface-2); box-shadow: 0 0 0 1px var(--line) inset; pointer-events: none; transition: transform .38s cubic-bezier(.2, .7, .2, 1), width .38s cubic-bezier(.2, .7, .2, 1), height .38s cubic-bezier(.2, .7, .2, 1); }
+        .has-ind > button { position: relative; z-index: 1; }
+        .has-ind > button[aria-pressed="true"] { background: transparent !important; box-shadow: none !important; }
         @media (min-width: 1024px) {
             .demo-body.is-phone { display: grid; grid-template-columns: minmax(0, 1fr) 260px min(400px, calc((100vh - 120px) * .46)) minmax(0, 1fr); grid-template-areas: ". bar stage ." ". note stage ."; column-gap: 56px; }
             .demo-body.is-phone .demo-bar { grid-area: bar; flex-direction: column; align-items: stretch; margin: 0; align-self: end; gap: 14px; }
@@ -336,10 +343,13 @@
         .setup ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
         .setup li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 16px 18px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line-soft); transition: border-color .3s, transform .3s; }
         .setup li:hover { border-color: var(--line); transform: translateX(4px); }
-        .setup li::before { content: counter(s, decimal-leading-zero); font: 700 15px var(--display); color: var(--blue); transition: color .4s; }
-        .setup li { transition: border-color .4s, transform .3s, background .4s; }
+        .setup li::before { content: counter(s, decimal-leading-zero); font: 700 15px var(--display); color: var(--blue); transition: opacity .25s, transform .3s; }
+        .setup li { position: relative; transition: border-color .4s, transform .3s, background .4s; }
         .setup li.done { border-color: rgba(108, 200, 94, .35); }
-        .setup li.done::before { content: "✓"; color: var(--green-hi); font-size: 18px; }
+        /* Done: the number shrinks away and a check pops in where it was (and back when scrolling up) */
+        .setup li::after { content: ""; position: absolute; left: 14px; top: 50%; width: 28px; height: 28px; margin-top: -14px; border-radius: 50%; background: rgba(108, 200, 94, .14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236cc85e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 15px no-repeat; box-shadow: 0 0 0 1px rgba(108, 200, 94, .5) inset, 0 0 14px -4px rgba(108, 200, 94, .6); opacity: 0; transform: scale(.4) rotate(-25deg); transition: opacity .2s, transform .45s cubic-bezier(.3, 1.6, .5, 1); pointer-events: none; }
+        .setup li.done::after { opacity: 1; transform: none; }
+        .setup li.done::before { opacity: 0; transform: scale(.5); }
         .setup li b { color: var(--white); font-weight: 600; display: block; }
         .setup li span { color: var(--muted); font-size: 14.5px; }
         .setup li em { font-style: normal; font: 600 12px var(--mono); color: var(--dim); }
@@ -354,7 +364,25 @@
         .final::before { content: ""; position: absolute; inset: 0; z-index: -1; background: url(assets/art-fallback.webp) 0 0 / 520px auto; transform: rotate(-12deg); opacity: .07;
             -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 95%); mask-image: radial-gradient(closest-side, #000 20%, transparent 95%); }
         .final::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(closest-side, rgba(102, 192, 244, .18), transparent 80%), radial-gradient(40% 35% at 50% 85%, rgba(229, 177, 67, .1), transparent); }
-        .final img.crystal { width: 76px; height: 76px; margin: 0 auto 22px; }
+        .savept { position: relative; width: 84px; height: 84px; margin: 0 auto 26px; display: grid; place-items: center; }
+        .savept .crystal { position: relative; z-index: 1; width: 76px; height: 76px; }
+        .savept .ring { position: absolute; inset: 6px; border-radius: 22px; border: 1.5px solid rgba(102, 192, 244, .6); opacity: 0; }
+        .final.live .ring { animation: ring 3.6s cubic-bezier(.2, .7, .2, 1) infinite; }
+        .final.live .ring + .ring { animation-delay: 1.8s; }
+        @keyframes ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(2.2); border-color: rgba(229, 177, 67, .35); } }
+        .final.saving .crystal { animation: save 1.1s cubic-bezier(.2, .7, .2, 1); }
+        @keyframes save { 30% { transform: scale(1.14); filter: drop-shadow(0 0 22px rgba(102, 192, 244, .9)); } }
+        .savefile { display: flex; justify-content: center; flex-wrap: wrap; row-gap: 14px; margin-top: 30px; }
+        .savefile div { display: grid; gap: 6px; padding-inline: clamp(16px, 3vw, 32px); }
+        .savefile div + div { border-left: 1px solid var(--line-soft); }
+        .savefile b { font: 700 clamp(26px, 3.4vw, 38px)/1 var(--display); color: var(--white); font-variant-numeric: tabular-nums; }
+        .savefile b.gold { color: var(--gold); }
+        .savefile span { font-size: 13.5px; color: var(--dim); }
+        .saved { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 13.5px; color: var(--muted); }
+        .saved i { width: 18px; height: 18px; border-radius: 50%; background: rgba(108, 200, 94, .14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236cc85e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 11px no-repeat; box-shadow: 0 0 0 1px rgba(108, 200, 94, .5) inset; }
+        .js .final .saved { opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s; }
+        .js .final.done .saved { opacity: 1; transform: none; }
+        .js .final.done .saved i { animation: pop .45s cubic-bezier(.3, 1.6, .5, 1) .1s backwards; }
         .final .cta { justify-content: center; margin-top: 30px; }
     </style>
 </head>
@@ -629,9 +657,15 @@
     <!-- Final -->
     <section class="section" style="padding-top:0">
         <div class="wrap">
-            <div class="final reveal">
-                <img class="crystal" src="assets/favicon.svg" alt="">
+            <div class="final reveal" id="final">
+                <div class="savept" aria-hidden="true"><i class="ring"></i><i class="ring"></i><img class="crystal" src="assets/favicon.svg" alt=""></div>
                 <h2>Your progress deserves<br><span class="grad">a save point.</span></h2>
+                <div class="savefile" aria-label="The author's totals">
+                    <div><b data-n="6145">6,145</b><span>hours played</span></div>
+                    <div><b data-n="4094">4,094</b><span>unlocks</span></div>
+                    <div><b data-n="19" class="gold">19</b><span>completed</span></div>
+                </div>
+                <p class="saved"><i></i>The author's save, kept every hour</p>
                 <p class="lede" style="margin:18px auto 0">Free, open source and yours: the code, the data and the address.</p>
                 <div class="cta">
                     <a class="btn btn-primary" href="https://github.com/yozuryu/savepoint-template/generate">Use the template</a>

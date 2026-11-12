@@ -25,6 +25,7 @@
         .rail a .tick { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none; display: grid; place-items: center; transition: background .2s, border-color .2s; }
         .rail a .tick.done { background: var(--green); border-color: var(--green); }
         .rail a .tick.done::after { content: ""; width: 7px; height: 4px; border: solid #0b0f15; border-width: 0 0 2px 2px; transform: rotate(-45deg) translateY(-1px); }
+        .rail a .tick.done { animation: pop .4s cubic-bezier(.3, 1.6, .5, 1); }
         .meter { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line-soft); }
         .meter b { font: 700 15px var(--display); color: var(--white); }
         .meter .bar { height: 6px; border-radius: 99px; background: var(--line-soft); overflow: hidden; }
@@ -47,7 +48,9 @@
         .doc a.btn { text-decoration: none; }
         .done-btn { margin-left: auto; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: 600 13px var(--body); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; }
         .done-btn:hover { color: var(--white); border-color: var(--blue); }
-        .done-btn[aria-pressed="true"] { background: rgba(82, 176, 67, .15); border-color: var(--green); color: var(--green-hi); }
+        .done-btn[aria-pressed="true"] { background: rgba(82, 176, 67, .15); border-color: var(--green); color: var(--green-hi); animation: press .35s cubic-bezier(.3, 1.6, .5, 1); }
+        @keyframes press { 40% { transform: scale(1.06); } }
+        tr:not([hidden]), [data-plat-only]:not([hidden]) { animation: fadein .3s backwards; }
         .note { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: rgba(102, 192, 244, .07); border: 1px solid rgba(102, 192, 244, .25); font-size: 15px; margin: 16px 0; }
         .note.warn { background: rgba(229, 177, 67, .07); border-color: rgba(229, 177, 67, .3); }
         .note svg { flex: none; width: 20px; height: 20px; margin-top: 2px; }
@@ -70,7 +73,7 @@
         /* Tabs for the three platforms */
         .ptabs { display: flex; gap: 6px; margin: 18px 0 0; flex-wrap: wrap; }
         .ptab { display: none; padding: 20px; border-radius: 0 12px 12px 12px; background: var(--glass); border: 1px solid var(--line-soft); }
-        .ptab.on { display: block; }
+        .ptab.on { display: block; animation: rise .35s cubic-bezier(.2, .7, .2, 1) backwards; }
         .ptab ol { margin: 0; }
 
         /* Tables */

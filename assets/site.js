@@ -25,6 +25,27 @@
         reveals.forEach(el => io.observe(el));
     }
 
+    // Pill switches: one highlight slides to the pressed option
+    document.querySelectorAll(".tabs, .seg").forEach(group => {
+        const ind = document.createElement("span");
+        ind.className = "tab-ind";
+        group.prepend(ind);
+        group.classList.add("has-ind");
+        const move = instant => {
+            const b = group.querySelector('[aria-pressed="true"]');
+            if (!b || !b.offsetWidth) return;
+            if (instant) ind.style.transition = "none";
+            ind.style.width = b.offsetWidth + "px";
+            ind.style.height = b.offsetHeight + "px";
+            ind.style.transform = "translate(" + b.offsetLeft + "px," + b.offsetTop + "px)";
+            if (instant) { void ind.offsetWidth; ind.style.transition = ""; }
+        };
+        new MutationObserver(() => move(false)).observe(group, { subtree: true, attributes: true, attributeFilter: ["aria-pressed"] });
+        // A size change (layout switch, fonts loading, a hidden tab row appearing) moves it without sliding
+        new ResizeObserver(() => move(true)).observe(group);
+        move(true);
+    });
+
     // Cards: a soft light follows the pointer
     document.querySelectorAll('.card').forEach(card => {
         card.addEventListener('pointermove', e => {
@@ -676,6 +697,47 @@
         }
     }
 
+    // ── Final: a save point. The author's totals count up once (read live, the hub header's rules: hours RA + Steam,
+    // unlocks and completed all three platforms), the crystal flashes, then rings pulse while it's on screen ──
+    const fin = document.getElementById("final");
+    if (fin) {
+        const nums = [...fin.querySelectorAll("[data-n]")];
+        const fmt = b => Number(b.dataset.n).toLocaleString("en");
+        let counted = false;
+        const live = fetch("https://yozuryu.github.io/gaming-hub/data/ra/profile.json").then(r => r.json()).then(async ra => {
+            const [st, xb] = await Promise.all(["steam", "xbox"].map(p => fetch("https://yozuryu.github.io/gaming-hub/data/" + p + "/profile.json").then(r => (r.ok ? r.json() : null)).catch(() => null)));
+            const res = (ra.gameAwardsAndProgress && ra.gameAwardsAndProgress.results) || [], s = (st && st.stats) || {}, x = (xb && xb.stats) || {};
+            const minutes = res.reduce((a, g) => a + (g.playtime || 0), 0) + (s.totalPlaytimeMin || 0);
+            const unlocks = res.reduce((a, g) => a + (g.numAwarded || 0), 0) + (s.unlockedAchievements || 0) + (x.unlockedAchievements || 0);
+            const done = res.filter(g => g.highestAwardKind === "mastered").length + (s.perfectCount || 0) + (x.perfectCount || 0);
+            [Math.round(minutes / 60), unlocks, done].forEach((v, i) => { if (v > 0) nums[i].dataset.n = v; });
+            if (counted) nums.forEach(b => (b.textContent = fmt(b)));
+        }).catch(() => {});
+        const count = () => {
+            counted = true;
+            fin.classList.add("saving");
+            const t0 = performance.now(), D = 1400;
+            const step = t => {
+                const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3);
+                nums.forEach(b => (b.textContent = Math.round(Number(b.dataset.n) * e).toLocaleString("en")));
+                if (k < 1) requestAnimationFrame(step); else fin.classList.add("done");
+            };
+            requestAnimationFrame(step);
+        };
+        if (reduced || !("IntersectionObserver" in window)) fin.classList.add("done");
+        else {
+            nums.forEach(b => (b.textContent = "0"));
+            let seen = false;
+            const pulse = () => fin.classList.toggle("live", seen && !document.hidden);
+            new IntersectionObserver(e => {
+                seen = e[0].isIntersecting;
+                if (seen && !counted) { counted = true; Promise.race([live, new Promise(r => setTimeout(r, 700))]).then(count); }
+                pulse();
+            }, { threshold: .35 }).observe(fin);
+            document.addEventListener("visibilitychange", pulse);
+        }
+    }
+
     // ── Live demo: the author's real hub in a phone or a scaled desktop window ──
     const stage = document.getElementById('demo-stage');
     if (!stage) return;
@@ -717,10 +779,29 @@
         page = b.dataset.page;
         load();
     }));
+    // Switching device: fade out, swap, then grow or shrink to the new height, keeping the demo where it was on screen
+    const demoBody = document.getElementById('demo-body');
+    let switching = 0;
     document.querySelectorAll('[data-device]').forEach(b => b.addEventListener('click', () => {
+        if (b.dataset.device === device) return;
         document.querySelectorAll('[data-device]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-        device = b.dataset.device;
-        show();
+        if (reduced) { device = b.dataset.device; show(); return; }
+        clearTimeout(switching);
+        // The browser would scroll to keep content below in place while the demo resizes; hold the demo still instead
+        document.documentElement.style.overflowAnchor = 'none';
+        const top0 = demoBody.getBoundingClientRect().top, h0 = demoBody.offsetHeight;
+        demoBody.classList.add('out');
+        switching = setTimeout(() => {
+            device = b.dataset.device;
+            show();
+            const h1 = demoBody.offsetHeight;
+            Object.assign(demoBody.style, { height: h0 + 'px', overflow: 'hidden', transition: 'none' });
+            scrollBy(0, demoBody.getBoundingClientRect().top - top0);
+            void demoBody.offsetHeight;
+            Object.assign(demoBody.style, { transition: 'height .45s cubic-bezier(.2, .7, .2, 1), opacity .35s .12s, transform .35s .12s', height: h1 + 'px' });
+            demoBody.classList.remove('out');
+            switching = setTimeout(() => { Object.assign(demoBody.style, { height: '', overflow: '', transition: '' }); document.documentElement.style.overflowAnchor = ''; }, 520);
+        }, 180);
     }));
     addEventListener('resize', fit);
     fit();
