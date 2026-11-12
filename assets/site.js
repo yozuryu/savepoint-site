@@ -72,7 +72,7 @@
     addCopyButtons();
 
     // The live hub's newest unlocks (91 days per platform), shared by the hero feed and the heatmap
-    const DATA = "https://yozuryu.github.io/gaming-hub/data/";
+    const DATA = "https://yozuryu.github.io/my-savepoint/data/";
     const chunks = (document.getElementById("feed") || document.getElementById("heat"))
         ? Promise.all(["ra", "steam"].map(p => fetch(DATA + p + "/achievements/1.json").then(r => { if (!r.ok) throw r.status; return r.json(); })))
             .then(([ra, st]) => [
@@ -177,7 +177,7 @@
     // the daily rhythm clock, the top game, the rarest unlock and one game story (a comeback, else a binge) ──
     const ana = document.getElementById("ana");
     if (ana) {
-        const HUB = "https://yozuryu.github.io/gaming-hub/";
+        const HUB = "https://yozuryu.github.io/my-savepoint/";
         const RA_MEDIA = "https://media.retroachievements.org";
         const DAY = 864e5, WINDOW = 90;
         const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -444,7 +444,7 @@
     // (#features/analytics; #analytics still works); opening one replays its small animation ──
     const ftabs = [...document.querySelectorAll("[data-ftab]")];
     if (ftabs.length) {
-        const HUB = "https://yozuryu.github.io/gaming-hub/";
+        const HUB = "https://yozuryu.github.io/my-savepoint/";
         const RA_MEDIA = "https://media.retroachievements.org";
         const get = u => fetch(HUB + u).then(r => (r.ok ? r.json() : null)).catch(() => null);
         const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -704,8 +704,8 @@
         const nums = [...fin.querySelectorAll("[data-n]")];
         const fmt = b => Number(b.dataset.n).toLocaleString("en");
         let counted = false;
-        const live = fetch("https://yozuryu.github.io/gaming-hub/data/ra/profile.json").then(r => r.json()).then(async ra => {
-            const [st, xb] = await Promise.all(["steam", "xbox"].map(p => fetch("https://yozuryu.github.io/gaming-hub/data/" + p + "/profile.json").then(r => (r.ok ? r.json() : null)).catch(() => null)));
+        const live = fetch("https://yozuryu.github.io/my-savepoint/data/ra/profile.json").then(r => r.json()).then(async ra => {
+            const [st, xb] = await Promise.all(["steam", "xbox"].map(p => fetch("https://yozuryu.github.io/my-savepoint/data/" + p + "/profile.json").then(r => (r.ok ? r.json() : null)).catch(() => null)));
             const res = (ra.gameAwardsAndProgress && ra.gameAwardsAndProgress.results) || [], s = (st && st.stats) || {}, x = (xb && xb.stats) || {};
             const minutes = res.reduce((a, g) => a + (g.playtime || 0), 0) + (s.totalPlaytimeMin || 0);
             const unlocks = res.reduce((a, g) => a + (g.numAwarded || 0), 0) + (s.unlockedAchievements || 0) + (x.unlockedAchievements || 0);
@@ -741,7 +741,7 @@
     // ── Live demo: the author's real hub in a phone or a scaled desktop window ──
     const stage = document.getElementById('demo-stage');
     if (!stage) return;
-    const LIVE = 'https://yozuryu.github.io/gaming-hub/';
+    const LIVE = 'https://yozuryu.github.io/my-savepoint/';
     // Both frames render the hub at a real size and are scaled down to fit, so its layout is never squeezed
     const DESK_W = 1360, DESK_H = 860, PHONE_W = 400;
     const phone = document.getElementById('demo-phone'), desk = document.getElementById('demo-desk');

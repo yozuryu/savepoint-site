@@ -1,6 +1,6 @@
 # Savepoint site
 
-The website for [Savepoint](https://github.com/yozuryu/savepoint-template): the landing page, the live demo (the author's own hub in a frame) and the interactive setup docs.
+The website for [Savepoint](https://github.com/yozuryu/savepoint): the landing page, the live demo (the author's own hub in a frame) and the interactive setup docs.
 
 Live at **https://yozuryu.github.io/savepoint-site/**.
 
