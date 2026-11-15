@@ -241,12 +241,15 @@
         .ser-stats { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
         .ser-stats b { color: var(--white); font-weight: 600; }
         .ser-stats i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+        /* Memory Card: the year's story picture stands in front of the page, like the other tabs' cards */
+        .mc-story { position: absolute; right: 4%; bottom: 0; width: 32%; height: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .8); }
         /* Narrow: no room for the overlap, so the card stands alone (the demo link leads to the page itself) */
         @media (max-width: 860px) {
             .show { grid-template-columns: minmax(0, 1fr); gap: 24px; }
             .show-stage { aspect-ratio: auto; max-width: 520px; width: 100%; }
             .show-shot { display: none; }
             .show-card { position: relative; width: 100%; }
+            .mc-story { position: relative; right: auto; display: block; width: min(70%, 300px); margin: 0 auto; }
         }
         @media (max-width: 600px) {
             .ftabs { width: auto; top: calc(env(safe-area-inset-top, 0px) + 70px); padding: 3px; margin-bottom: 22px; }

@@ -2,13 +2,14 @@
 // and the docs reader's own names, platforms and checklist (kept in this browser only).
 import { atom } from 'nanostores';
 
-export type FeatureTab = 'overview' | 'analytics' | 'activity' | 'completions' | 'series';
+export type FeatureTab = 'overview' | 'analytics' | 'activity' | 'completions' | 'series' | 'memory';
 export const FEATURE_TABS: { id: FeatureTab; label: string }[] = [
     { id: 'overview', label: 'Overview' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'activity', label: 'Activity' },
     { id: 'completions', label: 'Completions' },
     { id: 'series', label: 'Series' },
+    { id: 'memory', label: 'Memory Card' },
 ];
 export const activeTab = atom<FeatureTab>('overview');
 

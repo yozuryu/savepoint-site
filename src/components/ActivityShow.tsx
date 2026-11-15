@@ -1,4 +1,4 @@
-// Activity showcase: the latest play sessions (RA + Steam, idle games left out). The loop replays the
+// Activity showcase: the latest play sessions (RA + Steam, idle and hidden games left out). The loop replays the
 // last few arriving, oldest of them first, the way they came in.
 import { useEffect, useRef, useState } from 'react';
 import { asset, fmtHm, hubJson, monthDay, RA_MEDIA, raTitle } from '../lib/hub';
@@ -43,8 +43,8 @@ export default function ActivityShow() {
         if (!active || loaded.current) return;
         loaded.current = true;
         const y = new Date().getFullYear();
-        Promise.all([hubJson('data/hub/idle-games.json'), ...(['ra', 'steam'] as const).flatMap(p => [y - 1, y].map(yr => hubJson('data/' + p + '/playtime/' + yr + '.json').then(f => ({ p, f }))))]).then(([idleFile, ...files]) => {
-            const idle = new Set<string>((idleFile && idleFile.games) || []);
+        Promise.all([hubJson('data/hub/idle-games.json'), hubJson('data/hub/hidden-games.json'), ...(['ra', 'steam'] as const).flatMap(p => [y - 1, y].map(yr => hubJson('data/' + p + '/playtime/' + yr + '.json').then(f => ({ p, f }))))]).then(([idleFile, hiddenFile, ...files]) => {
+            const idle = new Set<string>([...((idleFile && idleFile.games) || []), ...((hiddenFile && hiddenFile.games) || [])]);
             const list = (files as { p: 'ra' | 'steam'; f: any }[]).flatMap(({ p, f }) => ((f && f.sessions) || []).map((s: any) => {
                 const g = (f.games || {})[s.gameId] || {};
                 return { p, id: String(s.gameId), name: p === 'ra' ? raTitle(g.name) : g.name, icon: g.icon ? (p === 'ra' ? RA_MEDIA + g.icon : g.icon) : '', minutes: s.minutes, start: Date.parse(s.start), end: Date.parse(s.end) };

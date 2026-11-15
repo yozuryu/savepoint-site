@@ -1,5 +1,5 @@
 // The best of the hub's Analytics page for the last 3 months, read live. Same rules as that page
-// (idle games and achievement farms left out, days and hours in the viewer's timezone).
+// (farms and hidden games left out, idle games without their playtime, days and hours in the viewer's timezone).
 import { hubJson as json, RA_MEDIA, xboxImg, raTitle, localKey, type Plat } from './hub';
 
 const DAY = 864e5, WINDOW = 90;
@@ -42,7 +42,7 @@ export async function computeAnalytics(): Promise<Analytics> {
         return files.flatMap(f => ((f && f.unlocks) || []).map((u: any) => ({ p, g: String(u.g), a: String(u.a), n: u.n as string, r: u.r as number | undefined, ms: Date.parse(u.t) })));
     }))).flat();
 
-    // Farms (Steam, 10+ unlocks at over 15 an hour, plus the admin's marks) and idle games are left out
+    // Farms (Steam, 10+ unlocks at over 15 an hour, plus the admin's marks)
     const marks = (await json('data/hub/farm-games.json')) || {};
     const notFarm = new Set<string>(marks.notFarms || []);
     const steamIds = [...new Set([...sessions, ...unlocks.map(u => ({ ...u, endMs: u.ms }))].filter(x => x.p === 'steam' && x.endMs >= prevMs).map(x => x.g))];
@@ -51,9 +51,11 @@ export async function computeAnalytics(): Promise<Analytics> {
         const g = await json('data/steam/games/' + id + '.json');
         return g && g.unlocked >= 10 && g.unlocked / Math.max((g.playtimeForever || 0) / 60, 0.1) > 15 ? 'steam:' + id : null;
     }))).filter((x): x is string => !!x), ...(marks.farms || [])]);
+    // Hidden games (picked in the admin) are left out like farms; idle games only lose their playtime
+    const hidden = new Set<string>(((await json('data/hub/hidden-games.json')) || {}).games || []);
     const idle = new Set<string>(((await json('data/hub/idle-games.json')) || {}).games || []);
-    const keep = (x: { p: string; g: string }) => !farms.has(x.p + ':' + x.g) && !idle.has(x.p + ':' + x.g);
-    const S = sessions.filter(keep), U = unlocks.filter(keep);
+    const keep = (x: { p: string; g: string }) => !farms.has(x.p + ':' + x.g) && !hidden.has(x.p + ':' + x.g);
+    const S = sessions.filter(x => keep(x) && !idle.has(x.p + ':' + x.g)), U = unlocks.filter(keep);
 
     const spread = (s: { startMs: number; endMs: number; minutes: number }, next: (d: Date) => number) => {
         const span = s.endMs - s.startMs;

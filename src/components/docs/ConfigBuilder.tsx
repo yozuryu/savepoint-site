@@ -1,15 +1,19 @@
 // Builds data/hub/config.json from a small form, with a rough preview of the hub header.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDocs } from './useDocs';
 import { PLATFORMS } from './AboutYou';
 import { asset } from '../../lib/hub';
 
 const tags = (v: string) => v.split(',').map(s => s.trim()).filter(Boolean);
+const browserZone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch { return 'UTC'; } };
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
 
 export default function ConfigBuilder() {
     const s = useDocs();
-    const [f, setF] = useState({ name: 'Player One', motto: 'Every save point tells a story', avatar: '', genre: 'RPG, Platformer', style: 'Pixel Art, Story Driven' });
+    const [f, setF] = useState({ name: 'Player One', motto: 'Every save point tells a story', avatar: '', genre: 'RPG, Platformer', style: 'Pixel Art, Story Driven', timezone: '' });
+    // The reader's timezone, read after hydration so the prerendered page and the browser agree
+    const [zone, setZone] = useState('UTC');
+    useEffect(() => setZone(browserZone()), []);
     const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
     const cfg = {
         username: f.name.trim() || 'Player One',
@@ -18,6 +22,8 @@ export default function ConfigBuilder() {
         tags: { genre: tags(f.genre), style: tags(f.style) },
         platforms: { retroachievements: { visible: !!s.plats.ra }, steam: { visible: !!s.plats.steam }, xbox: { visible: !!s.plats.xbox } },
         siteUrl: '',
+        // Memory Card counts days and hours in it; the reader's own timezone unless they change it
+        timezone: f.timezone.trim() || zone,
         playing: { visible: true }, series: { visible: true }, activity: { visible: true }, completions: { visible: true }, analytics: { visible: true },
     };
     const json = esc(JSON.stringify(cfg, null, 2))
@@ -33,6 +39,7 @@ export default function ConfigBuilder() {
                 <label className="f">Picture URL (optional)<input type="url" id="c-avatar" placeholder="https://avatars.githubusercontent.com/you" value={f.avatar} onChange={set('avatar')} /></label>
                 <label className="f">Genre tags, comma separated<input type="text" id="c-genre" value={f.genre} onChange={set('genre')} /></label>
                 <label className="f">Style tags, comma separated<input type="text" id="c-style" value={f.style} onChange={set('style')} /></label>
+                <label className="f">Timezone, for Memory Card<input type="text" id="c-timezone" placeholder={zone} value={f.timezone} onChange={set('timezone')} /></label>
             </div>
             <div className="preview" aria-label="Preview of the hub header">
                 <div className="top"><img src={asset('favicon.svg')} alt="" />Savepoint <span>› <i style={{ fontStyle: 'normal' }}>{cfg.username.toUpperCase()}</i></span></div>

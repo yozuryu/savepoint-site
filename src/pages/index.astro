@@ -24,6 +24,8 @@ import dCompletions from '../assets/shots/d-completions.webp';
 import adminConfig from '../assets/shots/admin-config.webp';
 import dActivity from '../assets/shots/d-activity.webp';
 import dSeries from '../assets/shots/d-series.webp';
+import dMemory from '../assets/shots/d-memory.webp';
+import memoryStory from '../assets/shots/memory-story.webp';
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const icon = (f: string) => base + 'assets/' + f;
@@ -180,6 +182,22 @@ const sizesCell = '(max-width: 600px) 0px, (max-width: 960px) 50vw, 400px';
                     <div class="show-stage">
                         <Image class="show-shot" src={dSeries} alt="The Series page on desktop" widths={[700, 1100]} sizes={sizesWide} />
                         <SeriesShow client:visible />
+                    </div>
+                </div>
+            </div>
+
+            <div class="fpanel" id="ft-memory" role="tabpanel" aria-label="Memory Card" hidden>
+                <div class="show">
+                    <div class="show-copy">
+                        <span class="tag" style="color:var(--green-hi)">Memory Card</span>
+                        <h3>Your year in games, ready to share</h3>
+                        <p>Every year gets its own page: your top five, the games you finished, your rarest unlocks, when you play, and a title picked from what made that year different.</p>
+                        <p>Share a story-sized or wide picture, or send the link: it previews that year's card.</p>
+                        <a class="show-demo" href="https://yozuryu.github.io/my-savepoint/memory-card/" target="_blank" rel="noopener">See the author's Memory Card <Fragment set:html={arrow} /></a>
+                    </div>
+                    <div class="show-stage">
+                        <Image class="show-shot" src={dMemory} alt="The Memory Card page on desktop" widths={[700, 1100]} sizes={sizesWide} />
+                        <Image class="mc-story" src={memoryStory} alt="The year's story picture, as it's shared" widths={[300, 500, 700]} sizes="(max-width: 860px) 70vw, 240px" />
                     </div>
                 </div>
             </div>
